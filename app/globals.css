@@ -1,0 +1,287 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* HS Hindustani Saudagar - Premium Earthy Color Palette */
+  --background: #FAF8F5; /* Warmer Off-white */
+  --foreground: #1A1613; /* Deep Rich Black */
+  --card: #FAF8F5;
+  --card-foreground: #1A1613;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1613;
+  --primary: #1A1613;
+  --primary-foreground: #FAF8F5;
+  --secondary: #EDE6DB; /* Softer Warm Beige */
+  --secondary-foreground: #1A1613;
+  --muted: #EDE6DB;
+  --muted-foreground: #7D6B5D; /* Richer Clay Brown */
+  --accent: #B85A38; /* Deeper Terracotta */
+  --accent-foreground: #FAF8F5;
+  --destructive: #B85A38;
+  --destructive-foreground: #FAF8F5;
+  --border: #E5DDD2;
+  --input: #E5DDD2;
+  --ring: #B85A38;
+  --chart-1: #B85A38;
+  --chart-2: #7D6B5D;
+  --chart-3: #EDE6DB;
+  --chart-4: #1A1613;
+  --chart-5: #FAF8F5;
+  --radius: 0.5rem;
+  
+  /* Custom Premium colors */
+  --terracotta: #B85A38;
+  --terracotta-light: #D4785A;
+  --clay-brown: #7D6B5D;
+  --warm-beige: #EDE6DB;
+  --cream: #FAF8F5;
+  --ink: #1A1613;
+  --gold: #C9A962;
+}
+
+@theme inline {
+  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
+  --font-serif: 'Cormorant Garamond', 'Georgia', serif;
+  --font-hindi: 'Tiro Devanagari Hindi', serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-light: var(--terracotta-light);
+  --color-clay-brown: var(--clay-brown);
+  --color-warm-beige: var(--warm-beige);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --color-gold: var(--gold);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
+  --radius-full: 9999px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'ss01', 'ss02', 'cv01';
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Premium text selection */
+  ::selection {
+    background: var(--terracotta);
+    color: var(--cream);
+  }
+}
+
+/* Hindi font class */
+.font-hindi {
+  font-family: 'Tiro Devanagari Hindi', serif;
+}
+
+/* Premium Marquee Animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+/* Premium Reveal Animation */
+@keyframes reveal-up {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.reveal-up {
+  animation: reveal-up 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Fade in animation */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+}
+
+/* Premium hover lift effect */
+.hover-lift {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -12px rgba(26, 22, 19, 0.15);
+}
+
+/* Chat Button Pulse */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2.5s ease-out infinite;
+}
+
+/* Subtle grain texture overlay */
+.grain-texture {
+  position: relative;
+}
+
+.grain-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.grain-texture > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Premium shadow utilities */
+.shadow-premium {
+  box-shadow: 0 4px 6px -1px rgba(26, 22, 19, 0.05), 
+              0 10px 15px -3px rgba(26, 22, 19, 0.08),
+              0 20px 25px -5px rgba(26, 22, 19, 0.05);
+}
+
+.shadow-premium-lg {
+  box-shadow: 0 10px 15px -3px rgba(26, 22, 19, 0.08),
+              0 25px 50px -12px rgba(26, 22, 19, 0.15);
+}
+
+/* Premium image hover */
+.image-hover {
+  overflow: hidden;
+}
+
+.image-hover img {
+  transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.image-hover:hover img {
+  transform: scale(1.08);
+}
+
+/* Smooth underline animation */
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--terracotta);
+  transition: width 0.3s ease;
+}
+
+.link-underline:hover::after {
+  width: 100%;
+}
+
+/* Button shine effect */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-shine:hover::before {
+  left: 100%;
+}
+
+/* Scroll indicator */
+@keyframes scroll-down {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 0.5;
+  }
+}
+
+.animate-scroll {
+  animation: scroll-down 2s ease-in-out infinite;
+}
