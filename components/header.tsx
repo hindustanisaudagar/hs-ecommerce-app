@@ -180,12 +180,12 @@ export function Header() {
           <div className="flex items-center justify-between h-14 md:h-16">
             {/* Logo + Brand Name */}
             <Link href="/" className="flex items-center gap-3 group shrink-0">
-              <div className="relative w-10 h-10 md:w-12 md:h-12 transition-transform duration-300 group-hover:scale-105">
+              <div className="relative w-14 h-14 md:w-16 md:h-16 transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src="/images/logo.jpg"
                   alt="Hindustani Saudagar"
                   fill
-                  className="object-contain"
+                  className="object-contain mix-blend-multiply"
                   priority
                 />
               </div>
@@ -242,12 +242,12 @@ export function Header() {
                   <div className="flex flex-col h-full">
                     <div className="p-6 border-b border-border/50">
                       <div className="flex items-center gap-3">
-                        <div className="relative w-12 h-12">
+                        <div className="relative w-14 h-14">
                           <Image
                             src="/images/logo.jpg"
                             alt="Hindustani Saudagar"
                             fill
-                            className="object-contain"
+                            className="object-contain mix-blend-multiply"
                           />
                         </div>
                         <span className="font-serif text-lg">Hindustani Saudagar</span>
