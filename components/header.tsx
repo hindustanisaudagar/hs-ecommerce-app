@@ -196,11 +196,11 @@ export function Header() {
 
             {/* Hindi Strip - Compact Tri-Color */}
             <div className="hidden md:flex items-center gap-2 shrink-0">
-              <span className="font-hindi text-sm text-orange-600 font-medium tracking-wide">
+              <span className="font-hindi text-base text-orange-600 font-medium tracking-wide">
                 बिताइए कुछ पल
               </span>
-              <span className="text-ink/40 text-sm">·</span>
-              <span className="font-hindi text-sm text-green-700 font-medium tracking-wide">
+              <span className="text-ink/40 text-base">·</span>
+              <span className="font-hindi text-base text-green-700 font-medium tracking-wide">
                 देश की मिट्टी के नाम
               </span>
             </div>
