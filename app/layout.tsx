@@ -1,21 +1,8 @@
 import type { Metadata } from 'next'
-import { Inter, Cormorant_Garamond, Tiro_Devanagari_Hindi } from 'next/font/google'
+import { Tiro_Devanagari_Hindi } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { CompareBar } from '@/components/compare-bar'
 import './globals.css'
-
-const inter = Inter({ 
-  subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  variable: '--font-inter'
-})
-
-const cormorant = Cormorant_Garamond({ 
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  style: ['normal', 'italic'],
-  variable: '--font-cormorant'
-})
 
 const tiroDevanagari = Tiro_Devanagari_Hindi({
   subsets: ['devanagari'],
@@ -41,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${cormorant.variable} ${tiroDevanagari.variable} bg-background`}>
+    <html lang="en" className={`${tiroDevanagari.variable} bg-background`}>
       <head>
         <script src="https://checkout.razorpay.com/v1/checkout.js" async />
         <script src="https://sdk.cashfree.com/js/v3/cashfree.js" async />

@@ -42,8 +42,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
-  --font-serif: 'Cormorant Garamond', 'Georgia', serif;
+  --font-sans: 'Arial', 'Helvetica Neue', system-ui, sans-serif;
+  --font-serif: 'Arial', 'Helvetica Neue', system-ui, sans-serif;
   --font-hindi: 'Tiro Devanagari Hindi', serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
