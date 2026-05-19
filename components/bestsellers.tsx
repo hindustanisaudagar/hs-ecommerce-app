@@ -12,7 +12,7 @@ const products = [
     image: "/images/product-1.jpg",
     tag: "New",
     tagColor: "bg-ink",
-    href: "#",
+    href: "/products/terracotta-studio-vase",
   },
   {
     name: "Artisan Coffee Mug",
@@ -21,7 +21,7 @@ const products = [
     image: "/images/product-2.jpg",
     tag: "Bestseller",
     tagColor: "bg-terracotta",
-    href: "#",
+    href: "/products/artisan-coffee-mug",
   },
   {
     name: "Clay Aroma Diffuser",
@@ -30,7 +30,7 @@ const products = [
     image: "/images/product-3.jpg",
     tag: "Editor&apos;s Pick",
     tagColor: "bg-clay-brown",
-    href: "#",
+    href: "/products/clay-aroma-diffuser",
   },
   {
     name: "Handmade Bowl Set",
@@ -39,7 +39,7 @@ const products = [
     image: "/images/product-4.jpg",
     tag: null,
     tagColor: null,
-    href: "#",
+    href: "/products/handmade-bowl-set",
   },
 ]
 
@@ -58,7 +58,7 @@ export function Bestsellers() {
               </h2>
             </div>
             <Link 
-              href="#shop" 
+              href="/products" 
               className="text-sm font-light text-ink link-underline tracking-wide flex items-center gap-2 group"
             >
               View all products

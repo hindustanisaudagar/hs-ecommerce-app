@@ -7,6 +7,7 @@ import { Search, User, ShoppingBag, Menu, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
+import { useCart } from "@/hooks/store/use-cart"
 
 interface DropdownColumn {
   title: string
@@ -127,7 +128,8 @@ const navLinks: NavLink[] = [
 ]
 
 export function Header() {
-  const [cartCount] = useState(2)
+  const getTotalItems = useCart((state) => state.getTotalItems)
+  const cartCount = getTotalItems()
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null)
@@ -219,7 +221,8 @@ export function Header() {
               >
                 <User className="w-5 h-5" strokeWidth={1.5} />
               </button>
-              <button 
+              <Link 
+                href="/cart"
                 className="p-2 hover:text-terracotta transition-all duration-300 relative rounded-full hover:bg-warm-beige/60" 
                 aria-label="Shopping bag"
               >
@@ -229,7 +232,7 @@ export function Header() {
                     {cartCount}
                   </span>
                 )}
-              </button>
+              </Link>
 
               {/* Mobile Menu */}
               <Sheet>

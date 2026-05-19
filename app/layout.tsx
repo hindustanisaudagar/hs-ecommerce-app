@@ -41,6 +41,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${cormorant.variable} ${tiroDevanagari.variable} bg-background`}>
+      <head>
+        <script src="https://checkout.razorpay.com/v1/checkout.js" async />
+      </head>
       <body className="font-sans antialiased">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
