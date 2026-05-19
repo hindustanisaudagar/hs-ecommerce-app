@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Package, ShoppingCart, FolderOpen, LayoutDashboard, ArrowLeft, Shield } from 'lucide-react'
-import { getServerUserRole } from '@/lib/auth/server'
 
 const adminNav = [
   { href: '/account/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -24,11 +23,17 @@ export default function AdminLayout({
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const role = await getServerUserRole()
-      if (role !== 'admin') {
+      try {
+        const res = await fetch('/api/admin/check')
+        const data = await res.json()
+        
+        if (!data.isAdmin) {
+          router.push('/account')
+        } else {
+          setIsAdmin(true)
+        }
+      } catch (error) {
         router.push('/account')
-      } else {
-        setIsAdmin(true)
       }
     }
     checkAdmin()
