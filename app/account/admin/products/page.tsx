@@ -73,6 +73,12 @@ export default function AdminProductsPage() {
                   Product
                 </th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
+                  SKU
+                </th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
+                  Variations
+                </th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
                   Price
                 </th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
@@ -112,6 +118,14 @@ export default function AdminProductsPage() {
                         </p>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm text-ink font-mono">{product.sku || '-'}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-sm text-ink">
+                      {product.has_variations ? 'Yes' : 'No'}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <p className="text-ink">

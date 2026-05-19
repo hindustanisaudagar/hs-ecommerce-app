@@ -11,7 +11,58 @@ export interface Product {
   is_active: boolean
   tags: string[]
   created_at: string
+  
+  // New fields
+  sku?: string
+  brand?: string
+  short_description?: string
+  specifications?: ProductSpecifications
+  safety_features?: string[]
+  features?: ProductFeature[]
+  product_story?: string
+  tradition_section?: string
+  made_in_india_section?: string
+  handmade_disclaimer?: string
+  feature_icons?: string[]
+  section_images?: string[]
+  banner_image?: string
+  meta_title?: string
+  meta_description?: string
+  category_ids?: string[]
+  is_comparable?: boolean
+  has_variations?: boolean
+  
   category?: Category
+  variations?: ProductVariation[]
+}
+
+export interface ProductSpecifications {
+  material?: string
+  contents?: string
+  capacity?: string
+  dimensions?: string
+  weight?: string
+  color?: string
+  package_includes?: string
+}
+
+export interface ProductFeature {
+  title: string
+  icon_url: string
+  description: string
+}
+
+export interface ProductVariation {
+  id: string
+  product_id: string
+  sku: string
+  color_name?: string
+  color_hex?: string
+  price?: number
+  stock: number
+  image_url?: string
+  is_active: boolean
+  created_at: string
 }
 
 export interface Category {
@@ -27,6 +78,7 @@ export interface CartItem {
   id: string
   product_id: string
   quantity: number
+  variation_id?: string
   product?: Product
 }
 
@@ -48,6 +100,7 @@ export interface OrderItem {
   id: string
   order_id: string
   product_id: string
+  variation_id?: string
   quantity: number
   price: number
   product?: Product

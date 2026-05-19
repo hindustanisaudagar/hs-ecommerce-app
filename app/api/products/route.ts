@@ -7,6 +7,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
+    const categoryIds = searchParams.get('categoryIds')
     const search = searchParams.get('search')
     const minPrice = searchParams.get('minPrice')
     const maxPrice = searchParams.get('maxPrice')
@@ -24,6 +25,11 @@ export async function GET(request: Request) {
 
     if (category) {
       query = query.eq('category_id', category)
+    }
+
+    if (categoryIds) {
+      const ids = categoryIds.split(',')
+      query = query.overlaps('category_ids', ids)
     }
 
     if (search) {
@@ -83,15 +89,35 @@ export async function POST(request: Request) {
 
     const body = await request.json()
 
-    const { data, error } = await supabase
+    // Extract variations from body
+    const { variations, ...productData } = body
+
+    // Insert product
+    const { data: product, error: productError } = await supabase
       .from('products')
-      .insert([body])
+      .insert([productData])
       .select()
       .single()
 
-    if (error) throw error
+    if (productError) throw productError
 
-    return NextResponse.json(data, { status: 201 })
+    // Insert variations if any
+    if (variations && variations.length > 0 && product) {
+      const variationsWithProductId = variations.map((v: any) => ({
+        ...v,
+        product_id: product.id,
+      }))
+
+      const { error: variationsError } = await supabase
+        .from('product_variations')
+        .insert(variationsWithProductId)
+
+      if (variationsError) {
+        console.error('Failed to insert variations:', variationsError)
+      }
+    }
+
+    return NextResponse.json(product, { status: 201 })
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },

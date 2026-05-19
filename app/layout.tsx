@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Cormorant_Garamond, Tiro_Devanagari_Hindi } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { CompareBar } from '@/components/compare-bar'
 import './globals.css'
 
 const inter = Inter({ 
@@ -47,6 +48,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased">
         {children}
+        <CompareBar />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
