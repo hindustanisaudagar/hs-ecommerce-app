@@ -1,6 +1,13 @@
 import { Resend } from 'resend'
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
+let resendInstance: Resend | null = null
+
+function getResend() {
+  if (!resendInstance) {
+    resendInstance = new Resend(process.env.RESEND_API_KEY || '')
+  }
+  return resendInstance
+}
 
 export async function sendOrderConfirmationEmail(
   email: string,
@@ -15,6 +22,7 @@ export async function sendOrderConfirmationEmail(
   }
 ) {
   try {
+    const resend = getResend()
     await resend.emails.send({
       from: 'Hindustani Saudagar <onboarding@resend.dev>',
       to: email,
