@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createRazorpayOrder } from '@/lib/razorpay'
 import { sendOrderConfirmationEmail } from '@/lib/email'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   try {
     const supabase = await createClient()

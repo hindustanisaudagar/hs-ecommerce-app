@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyPayment } from '@/lib/razorpay'
 import { sendOrderConfirmationEmail } from '@/lib/email'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
