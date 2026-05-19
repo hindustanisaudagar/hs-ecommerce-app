@@ -44,7 +44,7 @@ export default function AdminCategoriesPage() {
     e.preventDefault()
 
     try {
-      await fetch('/api/categories', {
+      const res = await fetch('/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -52,10 +52,17 @@ export default function AdminCategoriesPage() {
           parent_id: formData.parent_id || null,
         }),
       })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Failed to create category')
+      }
+
       setShowForm(false)
       setFormData({ name: '', slug: '', description: '', parent_id: '' })
       fetchCategories()
-    } catch (error) {
+    } catch (error: any) {
+      alert(error.message || 'Failed to create category')
       console.error('Failed to create category:', error)
     }
   }
@@ -64,9 +71,16 @@ export default function AdminCategoriesPage() {
     if (!confirm('Are you sure? This will also delete subcategories.')) return
 
     try {
-      await fetch(`/api/categories/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' })
+      
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Failed to delete category')
+      }
+      
       fetchCategories()
-    } catch (error) {
+    } catch (error: any) {
+      alert(error.message || 'Failed to delete category')
       console.error('Failed to delete category:', error)
     }
   }
