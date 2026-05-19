@@ -6,8 +6,6 @@ import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 import TextAlign from '@tiptap/extension-text-align'
-import { BulletList, OrderedList, ListItem } from '@tiptap/extension-list'
-import Blockquote from '@tiptap/extension-blockquote'
 import Color from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
 import {
@@ -53,10 +51,9 @@ export function RichTextEditor({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        bulletList: false,
-        orderedList: false,
-        listItem: false,
-        blockquote: false,
+        heading: {
+          levels: [1, 2, 3],
+        },
       }),
       Underline,
       Link.configure({
@@ -73,10 +70,6 @@ export function RichTextEditor({
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
-      BulletList,
-      OrderedList,
-      ListItem,
-      Blockquote,
       Color,
       TextStyle,
     ],
@@ -335,19 +328,6 @@ export function RichTextEditor({
 
       {/* Editor Content */}
       <EditorContent editor={editor} className="min-h-[200px]" />
-
-      {/* Placeholder */}
-      {!editor.isEmpty && (
-        <style>{`
-          .ProseMirror p.is-editor-empty:first-child::before {
-            content: attr(data-placeholder);
-            float: left;
-            color: #9ca3af;
-            pointer-events: none;
-            height: 0;
-          }
-        `}</style>
-      )}
     </div>
   )
 }
