@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getServerUser } from '@/lib/auth/server'
 
-export default async function AuthCallbackPage() {
+export async function GET() {
   const user = await getServerUser()
 
   if (user) {
