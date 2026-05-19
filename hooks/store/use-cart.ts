@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { Product } from '@/types'
 
 export interface CartItem {
@@ -16,6 +16,8 @@ interface CartStore {
   getTotalItems: () => number
   getTotalPrice: () => number
 }
+
+const isBrowser = typeof window !== 'undefined'
 
 export const useCart = create<CartStore>()(
   persist(
@@ -80,6 +82,8 @@ export const useCart = create<CartStore>()(
     }),
     {
       name: 'cart-storage',
+      storage: createJSONStorage(() => (isBrowser ? localStorage : undefined as any)),
+      skipHydration: !isBrowser,
     }
   )
 )

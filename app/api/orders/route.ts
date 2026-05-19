@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createRazorpayOrder } from '@/lib/razorpay'
+import { createCashfreeOrder } from '@/lib/cashfree'
 import { sendOrderConfirmationEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
@@ -54,10 +55,6 @@ export async function POST(request: Request) {
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
     const { items, shipping_address, billing_address, payment_method } = body
 
@@ -73,19 +70,46 @@ export async function POST(request: Request) {
       0
     )
 
-    const razorpayOrder = await createRazorpayOrder(total_amount)
+    let paymentData: any = {}
+
+    if (payment_method === 'razorpay') {
+      const razorpayOrder = await createRazorpayOrder(total_amount)
+      paymentData = {
+        razorpay_order_id: razorpayOrder.id,
+        razorpay_key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: total_amount,
+      }
+    } else if (payment_method === 'cashfree') {
+      const orderId = `order_${Date.now()}`
+      const cashfreeOrder = await createCashfreeOrder(
+        orderId,
+        total_amount,
+        shipping_address.name,
+        shipping_address.email,
+        shipping_address.phone
+      )
+      paymentData = {
+        payment_session_id: cashfreeOrder.payment_session_id,
+        order_id: orderId,
+        amount: total_amount,
+      }
+    } else if (payment_method === 'cod') {
+      paymentData = {
+        amount: total_amount,
+      }
+    }
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert([
         {
-          user_id: user.id,
+          user_id: user?.id || null,
           total_amount,
           shipping_address,
           billing_address,
           payment_method,
-          razorpay_order_id: razorpayOrder.id,
-          status: 'pending',
+          razorpay_order_id: paymentData.razorpay_order_id || null,
+          status: payment_method === 'cod' ? 'pending' : 'pending',
         },
       ])
       .select()
@@ -106,16 +130,16 @@ export async function POST(request: Request) {
 
     if (itemsError) throw itemsError
 
-    await supabase
-      .from('cart_items')
-      .delete()
-      .eq('user_id', user.id)
+    if (user) {
+      await supabase
+        .from('cart_items')
+        .delete()
+        .eq('user_id', user.id)
+    }
 
     return NextResponse.json({
       order,
-      razorpay_order_id: razorpayOrder.id,
-      razorpay_key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: total_amount,
+      ...paymentData,
     })
   } catch (error: any) {
     return NextResponse.json(

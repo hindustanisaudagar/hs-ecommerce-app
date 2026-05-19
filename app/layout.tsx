@@ -43,6 +43,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${cormorant.variable} ${tiroDevanagari.variable} bg-background`}>
       <head>
         <script src="https://checkout.razorpay.com/v1/checkout.js" async />
+        <script src="https://sdk.cashfree.com/js/v3/cashfree.js" async />
       </head>
       <body className="font-sans antialiased">
         {children}
