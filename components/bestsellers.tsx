@@ -1,49 +1,58 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowUpRight, Heart } from "lucide-react"
+import { ArrowUpRight, Heart, Loader2 } from "lucide-react"
 import { Reveal } from "@/components/reveal"
 import { Badge } from "@/components/ui/badge"
 
-const products = [
-  {
-    name: "Terracotta Studio Vase",
-    price: 2450,
-    originalPrice: 2850,
-    image: "/images/product-1.jpg",
-    tag: "New",
-    tagColor: "bg-ink",
-    href: "/products/terracotta-studio-vase",
-  },
-  {
-    name: "Artisan Coffee Mug",
-    price: 890,
-    originalPrice: null,
-    image: "/images/product-2.jpg",
-    tag: "Bestseller",
-    tagColor: "bg-terracotta",
-    href: "/products/artisan-coffee-mug",
-  },
-  {
-    name: "Clay Aroma Diffuser",
-    price: 1850,
-    originalPrice: null,
-    image: "/images/product-3.jpg",
-    tag: "Editor&apos;s Pick",
-    tagColor: "bg-clay-brown",
-    href: "/products/clay-aroma-diffuser",
-  },
-  {
-    name: "Handmade Bowl Set",
-    price: 3200,
-    originalPrice: 3800,
-    image: "/images/product-4.jpg",
-    tag: null,
-    tagColor: null,
-    href: "/products/handmade-bowl-set",
-  },
-]
+interface Product {
+  id: string
+  name: string
+  slug: string
+  price: number
+  original_price: number | null
+  images: string[]
+  tags: string[]
+}
 
 export function Bestsellers() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch('/api/products?limit=4&sortBy=created_at&sortOrder=desc')
+      const data = await res.json()
+      setProducts(data.products || [])
+    } catch (error) {
+      console.error('Failed to fetch products:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <section className="py-20 md:py-32 bg-warm-beige/40">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16">
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-terracotta" />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (products.length === 0) {
+    return null
+  }
+
   return (
     <section id="shop" className="py-20 md:py-32 bg-warm-beige/40 grain-texture">
       <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16">
@@ -69,30 +78,28 @@ export function Bestsellers() {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8">
           {products.map((product, index) => (
-            <Reveal key={product.name} delay={index * 100}>
-              <Link href={product.href} className="group block">
+            <Reveal key={product.id} delay={index * 100}>
+              <Link href={`/products/${product.slug}`} className="group block">
                 <div className="relative aspect-square overflow-hidden rounded-2xl md:rounded-3xl bg-cream mb-5 shadow-premium transition-all duration-500 group-hover:shadow-premium-lg">
                   <Image
-                    src={product.image}
+                    src={product.images?.[0] || '/placeholder.jpg'}
                     alt={product.name}
                     fill
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
-                  {product.tag && (
+                  {product.tags?.[0] && (
                     <Badge 
-                      className={`absolute top-4 left-4 ${product.tagColor} text-cream text-[9px] font-light tracking-widest uppercase rounded-full px-4 py-1.5 shadow-sm`}
+                      className="absolute top-4 left-4 bg-terracotta text-cream text-[9px] font-light tracking-widest uppercase rounded-full px-4 py-1.5 shadow-sm"
                     >
-                      {product.tag}
+                      {product.tags[0]}
                     </Badge>
                   )}
-                  {/* Wishlist button */}
                   <button 
                     className="absolute top-4 right-4 w-10 h-10 rounded-full bg-cream/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-cream shadow-sm"
                     aria-label="Add to wishlist"
                   >
                     <Heart className="w-4 h-4 text-ink" strokeWidth={1.5} />
                   </button>
-                  {/* Quick add overlay */}
                   <div className="absolute inset-x-4 bottom-4 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
                     <button className="w-full bg-ink/90 backdrop-blur-sm text-cream py-3 rounded-xl text-[11px] uppercase tracking-widest font-light hover:bg-ink transition-colors">
                       Quick Add
@@ -107,9 +114,9 @@ export function Bestsellers() {
                     <p className="text-base font-light text-ink">
                       ₹{product.price.toLocaleString('en-IN')}
                     </p>
-                    {product.originalPrice && (
+                    {product.original_price && product.original_price > product.price && (
                       <p className="text-sm text-muted-foreground line-through">
-                        ₹{product.originalPrice.toLocaleString('en-IN')}
+                        ₹{product.original_price.toLocaleString('en-IN')}
                       </p>
                     )}
                   </div>
