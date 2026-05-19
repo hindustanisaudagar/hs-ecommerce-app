@@ -32,9 +32,12 @@ export function LoginForm() {
 
   const handleGoogleLogin = async () => {
     setLoading(true)
+    setError('')
     try {
-      await signInWithGoogle()
+      const { error } = await signInWithGoogle()
+      if (error) throw error
     } catch (err: any) {
+      console.error('Google login error:', err)
       setError(err.message || 'Google login failed')
       setLoading(false)
     }
@@ -105,6 +108,7 @@ export function LoginForm() {
         </div>
 
         <button
+          type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
           className="w-full flex items-center justify-center gap-3 py-3 border border-border/50 rounded-xl text-ink hover:bg-warm-beige transition-colors disabled:opacity-50"
