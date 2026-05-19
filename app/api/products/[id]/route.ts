@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export const dynamic = 'force-dynamic'
-
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -12,7 +10,7 @@ export async function GET(
 
     const { data, error } = await supabase
       .from('products')
-      .select('*, category:categories(*)')
+      .select('*, category:categories(name, slug)')
       .eq('id', params.id)
       .single()
 
@@ -51,56 +49,40 @@ export async function PUT(
     }
 
     const body = await request.json()
+    const { variations, ...productData } = body
 
-    const { data, error } = await supabase
+    // Update product
+    const { data: product, error: productError } = await supabase
       .from('products')
-      .update(body)
+      .update(productData)
       .eq('id', params.id)
       .select()
       .single()
 
-    if (error) throw error
+    if (productError) throw productError
 
-    return NextResponse.json(data)
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    )
-  }
-}
+    // Handle variations
+    if (variations) {
+      // Delete existing variations
+      await supabase
+        .from('product_variations')
+        .delete()
+        .eq('product_id', params.id)
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const supabase = await createClient()
+      // Insert new variations
+      if (variations.length > 0) {
+        const variationsWithProductId = variations.map((v: any) => ({
+          ...v,
+          product_id: params.id,
+        }))
 
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        await supabase
+          .from('product_variations')
+          .insert(variationsWithProductId)
+      }
     }
 
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (userData?.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', params.id)
-
-    if (error) throw error
-
-    return NextResponse.json({ success: true })
+    return NextResponse.json(product)
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },
