@@ -6,10 +6,7 @@ import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 import TextAlign from '@tiptap/extension-text-align'
-import Heading from '@tiptap/extension-heading'
-import BulletList from '@tiptap/extension-bullet-list'
-import OrderedList from '@tiptap/extension-ordered-list'
-import ListItem from '@tiptap/extension-list-item'
+import { BulletList, OrderedList, ListItem } from '@tiptap/extension-list'
 import Blockquote from '@tiptap/extension-blockquote'
 import Color from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
@@ -56,7 +53,6 @@ export function RichTextEditor({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: false,
         bulletList: false,
         orderedList: false,
         listItem: false,
@@ -76,9 +72,6 @@ export function RichTextEditor({
       }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
-      }),
-      Heading.configure({
-        levels: [1, 2, 3],
       }),
       BulletList,
       OrderedList,
