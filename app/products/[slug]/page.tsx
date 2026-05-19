@@ -33,10 +33,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const fetchProduct = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/products?search=${slug}`)
+      const res = await fetch(`/api/products?slug=${slug}`)
       const data = await res.json()
-      const foundProduct = data.products?.find((p: Product) => p.slug === slug)
-      setProduct(foundProduct || null)
+      const foundProduct = data.products?.[0] || null
+      setProduct(foundProduct)
 
       if (foundProduct?.has_variations && foundProduct.id) {
         const varRes = await fetch(`/api/products/${foundProduct.id}/variations`)
@@ -55,6 +55,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       for (let i = 0; i < quantity; i++) {
         addItem(product)
       }
+      alert(`${quantity} item(s) added to cart!`)
     }
   }
 

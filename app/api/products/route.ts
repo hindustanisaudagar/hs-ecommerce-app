@@ -9,6 +9,7 @@ export async function GET(request: Request) {
     const category = searchParams.get('category')
     const categoryIds = searchParams.get('categoryIds')
     const search = searchParams.get('search')
+    const slug = searchParams.get('slug')
     const minPrice = searchParams.get('minPrice')
     const maxPrice = searchParams.get('maxPrice')
     const sortBy = searchParams.get('sortBy') || 'created_at'
@@ -22,6 +23,10 @@ export async function GET(request: Request) {
       .from('products')
       .select('*, category:categories(name, slug)')
       .eq('is_active', true)
+
+    if (slug) {
+      query = query.eq('slug', slug)
+    }
 
     if (category) {
       query = query.eq('category_id', category)
