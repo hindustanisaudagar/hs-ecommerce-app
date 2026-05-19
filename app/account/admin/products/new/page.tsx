@@ -246,11 +246,13 @@ export default function AdminNewProductPage() {
         package_includes: formData.package_includes,
       }
 
+      const { material, contents, capacity, dimensions, weight, color, package_includes, ...restFormData } = formData
+
       const res = await fetch('/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
+          ...restFormData,
           price: parseFloat(formData.price),
           original_price: formData.original_price ? parseFloat(formData.original_price) : null,
           stock: parseInt(formData.stock) || 0,
