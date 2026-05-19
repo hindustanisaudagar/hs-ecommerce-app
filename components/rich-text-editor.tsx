@@ -50,11 +50,7 @@ export function RichTextEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
-        },
-      }),
+      StarterKit,
       Underline,
       Link.configure({
         openOnClick: false,
@@ -130,7 +126,6 @@ export function RichTextEditor({
 
   return (
     <div className={`border border-border/50 rounded-xl overflow-hidden bg-warm-beige/30 ${className}`}>
-      {/* Toolbar */}
       <div className="flex flex-wrap gap-1 p-2 border-b border-border/50 bg-warm-beige/50">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -235,7 +230,6 @@ export function RichTextEditor({
 
         <div className="w-px h-6 bg-border/50 mx-1 self-center" />
 
-        {/* Color Picker */}
         <div className="relative">
           <ToolbarButton
             onClick={() => setShowColorPicker(!showColorPicker)}
@@ -297,7 +291,6 @@ export function RichTextEditor({
         </ToolbarButton>
       </div>
 
-      {/* Link Dialog */}
       {showLinkDialog && (
         <div className="p-3 border-b border-border/50 bg-warm-beige/50 flex gap-2">
           <input
@@ -326,7 +319,6 @@ export function RichTextEditor({
         </div>
       )}
 
-      {/* Editor Content */}
       <EditorContent editor={editor} className="min-h-[200px]" />
     </div>
   )
