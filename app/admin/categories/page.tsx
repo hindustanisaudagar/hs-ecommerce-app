@@ -13,6 +13,13 @@ interface Category {
   children?: Category[]
 }
 
+interface FlatCategory {
+  id: string
+  name: string
+  level: number
+  label: string
+}
+
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -39,6 +46,26 @@ export default function AdminCategoriesPage() {
       setLoading(false)
     }
   }
+
+  const flattenCategories = (cats: Category[], level = 0, prefix = ''): FlatCategory[] => {
+    let result: FlatCategory[] = []
+    for (const cat of cats) {
+      result.push({
+        id: cat.id,
+        name: cat.name,
+        level,
+        label: prefix + cat.name,
+      })
+      if (cat.children && cat.children.length > 0) {
+        result = result.concat(
+          flattenCategories(cat.children, level + 1, prefix + '— ')
+        )
+      }
+    }
+    return result
+  }
+
+  const flatCategories = flattenCategories(categories)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -163,7 +190,7 @@ export default function AdminCategoriesPage() {
                 setFormData({ ...formData, name: e.target.value, slug })
               }}
               className="w-full px-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
-              placeholder="e.g., Dining, Storage, Decor"
+              placeholder="Category name"
             />
           </div>
 
@@ -177,9 +204,9 @@ export default function AdminCategoriesPage() {
               className="w-full px-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
             >
               <option value="">None (Main Category)</option>
-              {categories.map((cat) => (
+              {flatCategories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
-                  {cat.name}
+                  {cat.label}
                 </option>
               ))}
             </select>
