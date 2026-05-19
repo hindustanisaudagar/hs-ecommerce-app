@@ -1,13 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Upload, X } from 'lucide-react'
 import Link from 'next/link'
 
+interface Category {
+  id: string
+  name: string
+  slug: string
+}
+
 export default function AdminNewProductPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -21,6 +28,20 @@ export default function AdminNewProductPage() {
   })
   const [images, setImages] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch('/api/categories')
+      const data = await res.json()
+      setCategories(data.categories || [])
+    } catch (error) {
+      console.error('Failed to fetch categories:', error)
+    }
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -160,6 +181,26 @@ export default function AdminNewProductPage() {
               onChange={handleChange}
               className="w-full px-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm text-muted-foreground mb-2">
+              Category *
+            </label>
+            <select
+              name="category_id"
+              required
+              value={formData.category_id}
+              onChange={handleChange}
+              className="w-full px-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
+            >
+              <option value="">Select a category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
