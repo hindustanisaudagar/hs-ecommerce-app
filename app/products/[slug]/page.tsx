@@ -8,6 +8,7 @@ import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { Reveal } from '@/components/reveal'
 import { useCart } from '@/hooks/store/use-cart'
+import { useWishlist } from '@/hooks/store/use-wishlist'
 import { Product } from '@/types'
 
 export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -16,8 +17,9 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
-  const [isWishlisted, setIsWishlisted] = useState(false)
   const addItem = useCart((state) => state.addItem)
+  const { toggleItem, isInWishlist } = useWishlist()
+  const isWishlisted = product ? isInWishlist(product.id) : false
 
   useEffect(() => {
     fetchProduct()
@@ -222,7 +224,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                   </button>
                   <button
-                    onClick={() => setIsWishlisted(!isWishlisted)}
+                    onClick={() => product && toggleItem(product.id)}
                     className={`p-4 border border-border/50 rounded-xl transition-colors ${
                       isWishlisted
                         ? 'bg-terracotta border-terracotta text-cream'

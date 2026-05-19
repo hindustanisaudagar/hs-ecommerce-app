@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { useCart } from "@/hooks/store/use-cart"
+import { useAuth } from "@/hooks/use-auth"
+import { UserDropdown } from "@/components/auth/user-dropdown"
 
 interface DropdownColumn {
   title: string
@@ -215,12 +217,9 @@ export function Header() {
               >
                 <Search className="w-5 h-5" strokeWidth={1.5} />
               </button>
-              <button 
-                className="p-2 hover:text-terracotta transition-all duration-300 rounded-full hover:bg-warm-beige/60 hidden sm:flex" 
-                aria-label="Account"
-              >
-                <User className="w-5 h-5" strokeWidth={1.5} />
-              </button>
+              
+              <AuthButton />
+              
               <Link 
                 href="/cart"
                 className="p-2 hover:text-terracotta transition-all duration-300 relative rounded-full hover:bg-warm-beige/60" 
@@ -416,5 +415,29 @@ export function Header() {
         )}
       </nav>
     </header>
+  )
+}
+
+function AuthButton() {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="w-8 h-8 rounded-full bg-warm-beige/60 animate-pulse hidden sm:block" />
+    )
+  }
+
+  if (user) {
+    return <UserDropdown />
+  }
+
+  return (
+    <Link
+      href="/auth/login"
+      className="p-2 hover:text-terracotta transition-all duration-300 rounded-full hover:bg-warm-beige/60 hidden sm:flex"
+      aria-label="Account"
+    >
+      <User className="w-5 h-5" strokeWidth={1.5} />
+    </Link>
   )
 }
