@@ -341,10 +341,13 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
 
       // Remove any undefined values
       Object.keys(cleanData).forEach((key) => {
-        if ((cleanData as any)[key] === undefined) {
+        const val = (cleanData as any)[key]
+        if (val === undefined || val === 'undefined') {
           delete (cleanData as any)[key]
         }
       })
+
+      console.log('Sending to API:', JSON.stringify(cleanData, null, 2))
 
       const res = await fetch(`/api/products/${id}`, {
         method: 'PUT',

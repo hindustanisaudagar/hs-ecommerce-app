@@ -49,7 +49,17 @@ export async function PUT(
     }
 
     const body = await request.json()
+    console.log('PUT /api/products/[id] received:', JSON.stringify(body, null, 2))
     const { variations, ...productData } = body
+
+    // Remove undefined values from productData
+    Object.keys(productData).forEach((key) => {
+      if ((productData as any)[key] === undefined || (productData as any)[key] === 'undefined') {
+        delete (productData as any)[key]
+      }
+    })
+
+    console.log('Sending to Supabase:', JSON.stringify(productData, null, 2))
 
     // Update product
     const { data: product, error: productError } = await supabase
