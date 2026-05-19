@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
-import { getServerUser } from '@/lib/auth/server'
+import { getServerUser, getServerUserRole } from '@/lib/auth/server'
 import Link from 'next/link'
-import { Package, Heart, MapPin, Settings, LogOut } from 'lucide-react'
+import { Package, Heart, MapPin, Settings, LogOut, Shield } from 'lucide-react'
 import { signOut } from '@/lib/auth/client'
 
 export default async function AccountPage() {
@@ -11,6 +11,7 @@ export default async function AccountPage() {
     redirect('/auth/login')
   }
 
+  const role = await getServerUserRole()
   const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'User'
 
   return (
@@ -22,6 +23,17 @@ export default async function AccountPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {role === 'admin' && (
+            <Link
+              href="/account/admin"
+              className="bg-ink rounded-2xl p-6 shadow-premium hover:shadow-premium-lg transition-shadow group"
+            >
+              <Shield className="w-8 h-8 text-cream mb-4" />
+              <h3 className="font-medium text-cream mb-1">Admin Database Panel</h3>
+              <p className="text-sm text-cream/70">Manage products, orders & categories</p>
+            </Link>
+          )}
+
           <Link
             href="/account/orders"
             className="bg-cream rounded-2xl p-6 shadow-premium hover:shadow-premium-lg transition-shadow group"

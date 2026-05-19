@@ -42,7 +42,7 @@ export default function AdminProductsPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="font-serif text-2xl text-ink">Products</h1>
         <Link
-          href="/admin/products/new"
+            href="/account/admin/products/new"
           className="flex items-center gap-2 bg-ink text-cream px-6 py-3 rounded-xl text-sm hover:bg-ink/90 transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -58,7 +58,7 @@ export default function AdminProductsPage() {
         <div className="text-center py-12 bg-cream rounded-2xl">
           <p className="text-muted-foreground mb-4">No products yet</p>
           <Link
-            href="/admin/products/new"
+          href="/account/admin/products/new"
             className="text-terracotta hover:underline"
           >
             Add your first product
@@ -157,7 +157,7 @@ export default function AdminProductsPage() {
                         <Eye className="w-4 h-4" />
                       </Link>
                       <Link
-                        href={`/admin/products/${product.id}/edit`}
+                        href={`/account/admin/products/${product.id}/edit`}
                         className="p-2 text-muted-foreground hover:text-terracotta transition-colors"
                         title="Edit"
                       >

@@ -95,28 +95,28 @@ export default function AdminDashboardPage() {
         <h2 className="font-serif text-xl text-ink mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <a
-            href="/admin/products/new"
+            href="/account/admin/products/new"
             className="p-4 border border-border/50 rounded-xl text-center hover:bg-warm-beige transition-colors"
           >
             <Package className="w-6 h-6 mx-auto mb-2 text-terracotta" />
             <p className="text-sm text-ink">Add Product</p>
           </a>
           <a
-            href="/admin/products"
+            href="/account/admin/products"
             className="p-4 border border-border/50 rounded-xl text-center hover:bg-warm-beige transition-colors"
           >
             <Package className="w-6 h-6 mx-auto mb-2 text-clay-brown" />
             <p className="text-sm text-ink">Manage Products</p>
           </a>
           <a
-            href="/admin/orders"
+            href="/account/admin/orders"
             className="p-4 border border-border/50 rounded-xl text-center hover:bg-warm-beige transition-colors"
           >
             <ShoppingCart className="w-6 h-6 mx-auto mb-2 text-gold" />
             <p className="text-sm text-ink">View Orders</p>
           </a>
           <a
-            href="/admin/categories"
+            href="/account/admin/categories"
             className="p-4 border border-border/50 rounded-xl text-center hover:bg-warm-beige transition-colors"
           >
             <TrendingUp className="w-6 h-6 mx-auto mb-2 text-ink" />

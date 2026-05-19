@@ -121,7 +121,7 @@ export default function AdminNewProductPage() {
         throw new Error(data.error || 'Failed to create product')
       }
 
-      router.push('/admin/products')
+      router.push('/account/admin/products')
     } catch (error: any) {
       alert(error.message || 'Failed to create product')
     } finally {
@@ -132,7 +132,7 @@ export default function AdminNewProductPage() {
   return (
     <div>
       <Link
-        href="/admin/products"
+        href="/account/admin/products"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-ink mb-8 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
@@ -325,7 +325,7 @@ export default function AdminNewProductPage() {
             {loading ? 'Creating...' : 'Create Product'}
           </button>
           <Link
-            href="/admin/products"
+        href="/account/admin/products"
             className="px-8 py-4 border border-border/50 rounded-xl text-sm text-ink hover:bg-warm-beige transition-colors"
           >
             Cancel
