@@ -236,6 +236,27 @@ export default function AdminNewProductPage() {
     setLoading(true)
 
     try {
+      // Deep clean function to remove all 'undefined' strings and undefined values
+      const deepClean = (obj: any): any => {
+        if (obj === null || obj === undefined || obj === 'undefined') return undefined
+        if (typeof obj === 'string' && obj === 'undefined') return undefined
+        if (Array.isArray(obj)) {
+          const cleaned = obj.map(item => deepClean(item)).filter(item => item !== undefined)
+          return cleaned.length > 0 ? cleaned : []
+        }
+        if (typeof obj === 'object') {
+          const cleaned: any = {}
+          for (const [key, value] of Object.entries(obj)) {
+            const cleanValue = deepClean(value)
+            if (cleanValue !== undefined && cleanValue !== 'undefined') {
+              cleaned[key] = cleanValue
+            }
+          }
+          return cleaned
+        }
+        return obj
+      }
+
       const specifications = {
         material: formData.material,
         contents: formData.contents,
@@ -246,7 +267,7 @@ export default function AdminNewProductPage() {
         package_includes: formData.package_includes,
       }
 
-      const { material, contents, capacity, dimensions, weight, color, package_includes, category_id, ...restFormData } = formData
+      const { material, contents, capacity, dimensions, weight, color, package_includes, category_id, category_ids, id, ...restFormData } = formData
 
       const cleanData = {
         ...restFormData,
@@ -257,7 +278,9 @@ export default function AdminNewProductPage() {
         section_images: sectionImages.length > 0 ? sectionImages : [],
         banner_image: bannerImage || null,
         tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
-        category_ids: selectedCategories.length > 0 ? selectedCategories : [],
+        category_ids: selectedCategories.filter(c => c && c !== 'undefined' && c !== 'null').length > 0 
+          ? selectedCategories.filter(c => c && c !== 'undefined' && c !== 'null') 
+          : [],
         specifications,
         features: features.length > 0 ? features : [],
         has_variations: variations.length > 0,
@@ -271,16 +294,13 @@ export default function AdminNewProductPage() {
         })),
       }
 
-      Object.keys(cleanData).forEach((key) => {
-        if ((cleanData as any)[key] === undefined) {
-          delete (cleanData as any)[key]
-        }
-      })
+      // Deep clean the entire payload
+      const finalData = deepClean(cleanData)
 
       const res = await fetch('/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cleanData),
+        body: JSON.stringify(finalData),
       })
 
       if (!res.ok) {

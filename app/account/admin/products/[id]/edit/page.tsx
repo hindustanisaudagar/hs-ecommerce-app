@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Upload, X, Plus, Trash2, ChevronDown, ChevronUp, Image as ImageIcon, Palette, Shield, BookOpen, Tag, Globe, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
@@ -30,6 +30,83 @@ interface VariationFormData {
   price: string
   stock: string
   image_url: string
+}
+
+interface SectionHeaderProps {
+  icon: any
+  title: string
+  section: string
+  badge?: string
+  isExpanded: boolean
+  onToggle: (section: string) => void
+}
+
+function SectionHeader({ icon: Icon, title, section, badge, isExpanded, onToggle }: SectionHeaderProps) {
+  return (
+    <button
+      type="button"
+      onClick={() => onToggle(section)}
+      className="w-full flex items-center justify-between p-6 hover:bg-warm-beige/30 transition-colors"
+    >
+      <div className="flex items-center gap-3">
+        <Icon className="w-5 h-5 text-terracotta" />
+        <h2 className="font-serif text-lg text-ink">{title}</h2>
+        {badge && (
+          <span className="text-xs bg-terracotta/10 text-terracotta px-2 py-0.5 rounded-full">
+            {badge}
+          </span>
+        )}
+      </div>
+      {isExpanded ? (
+        <ChevronUp className="w-5 h-5 text-muted-foreground" />
+      ) : (
+        <ChevronDown className="w-5 h-5 text-muted-foreground" />
+      )}
+    </button>
+  )
+}
+
+interface SectionContentProps {
+  isVisible: boolean
+  children: React.ReactNode
+}
+
+function SectionContent({ isVisible, children }: SectionContentProps) {
+  if (!isVisible) return null
+  return <div className="p-6 pt-0 space-y-6">{children}</div>
+}
+
+interface InputFieldProps {
+  label: string
+  name: string
+  type?: string
+  placeholder?: string
+  required?: boolean
+  step?: string
+  min?: string
+  value?: string
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+}
+
+function InputField({ label, name, type = 'text', placeholder, required = false, step, min, value, onChange }: InputFieldProps) {
+  return (
+    <div>
+      <label className="block text-sm text-muted-foreground mb-2">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <input
+        type={type}
+        name={name}
+        required={required}
+        placeholder={placeholder}
+        step={step}
+        min={min}
+        value={value || ''}
+        onChange={onChange}
+        className="w-full px-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
+      />
+    </div>
+  )
 }
 
 export default function AdminEditProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -303,6 +380,27 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
     setLoading(true)
 
     try {
+      // Deep clean function to remove all 'undefined' strings and undefined values
+      const deepClean = (obj: any): any => {
+        if (obj === null || obj === undefined || obj === 'undefined') return undefined
+        if (typeof obj === 'string' && obj === 'undefined') return undefined
+        if (Array.isArray(obj)) {
+          const cleaned = obj.map(item => deepClean(item)).filter(item => item !== undefined)
+          return cleaned.length > 0 ? cleaned : []
+        }
+        if (typeof obj === 'object') {
+          const cleaned: any = {}
+          for (const [key, value] of Object.entries(obj)) {
+            const cleanValue = deepClean(value)
+            if (cleanValue !== undefined && cleanValue !== 'undefined') {
+              cleaned[key] = cleanValue
+            }
+          }
+          return cleaned
+        }
+        return obj
+      }
+
       const specifications = {
         material: formData.material,
         contents: formData.contents,
@@ -313,9 +411,8 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
         package_includes: formData.package_includes,
       }
 
-      const { material, contents, capacity, dimensions, weight, color, package_includes, category_id, ...restFormData } = formData
+      const { material, contents, capacity, dimensions, weight, color, package_includes, category_id, category_ids, id, ...restFormData } = formData
 
-      // Clean up undefined/null values
       const cleanData = {
         ...restFormData,
         price: parseFloat(formData.price) || 0,
@@ -325,7 +422,9 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
         section_images: sectionImages.length > 0 ? sectionImages : [],
         banner_image: bannerImage || null,
         tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
-        category_ids: selectedCategories.length > 0 ? selectedCategories : [],
+        category_ids: selectedCategories.filter(c => c && c !== 'undefined' && c !== 'null').length > 0 
+          ? selectedCategories.filter(c => c && c !== 'undefined' && c !== 'null') 
+          : [],
         specifications,
         features: features.length > 0 ? features : [],
         has_variations: variations.length > 0,
@@ -339,20 +438,15 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
         })),
       }
 
-      // Remove any undefined values
-      Object.keys(cleanData).forEach((key) => {
-        const val = (cleanData as any)[key]
-        if (val === undefined || val === 'undefined') {
-          delete (cleanData as any)[key]
-        }
-      })
+      // Deep clean the entire payload
+      const finalData = deepClean(cleanData)
 
-      console.log('Sending to API:', JSON.stringify(cleanData, null, 2))
+      console.log('Sending to API:', JSON.stringify(finalData, null, 2))
 
       const res = await fetch(`/api/products/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cleanData),
+        body: JSON.stringify(finalData),
       })
 
       if (!res.ok) {
@@ -376,83 +470,6 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
     'Oven Safe',
     'Food Grade',
   ]
-
-  const SectionHeader = ({
-    icon: Icon,
-    title,
-    section,
-    badge,
-  }: {
-    icon: any
-    title: string
-    section: string
-    badge?: string
-  }) => (
-    <button
-      type="button"
-      onClick={() => toggleSection(section)}
-      className="w-full flex items-center justify-between p-6 hover:bg-warm-beige/30 transition-colors"
-    >
-      <div className="flex items-center gap-3">
-        <Icon className="w-5 h-5 text-terracotta" />
-        <h2 className="font-serif text-lg text-ink">{title}</h2>
-        {badge && (
-          <span className="text-xs bg-terracotta/10 text-terracotta px-2 py-0.5 rounded-full">
-            {badge}
-          </span>
-        )}
-      </div>
-      {expandedSections[section] ? (
-        <ChevronUp className="w-5 h-5 text-muted-foreground" />
-      ) : (
-        <ChevronDown className="w-5 h-5 text-muted-foreground" />
-      )}
-    </button>
-  )
-
-  const SectionContent = ({ section, children }: { section: string; children: React.ReactNode }) => {
-    if (!expandedSections[section]) return null
-    return <div className="p-6 pt-0 space-y-6">{children}</div>
-  }
-
-  const InputField = ({
-    label,
-    name,
-    type = 'text',
-    placeholder,
-    required = false,
-    step,
-    min,
-    value,
-    onChange,
-  }: {
-    label: string
-    name: string
-    type?: string
-    placeholder?: string
-    required?: boolean
-    step?: string
-    min?: string
-    value?: string
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
-  }) => (
-    <div>
-      <label className="block text-sm text-muted-foreground mb-2">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <input
-        type={type}
-        name={name}
-        required={required}
-        placeholder={placeholder}
-        step={step}
-        min={min}
-        value={value !== undefined ? value : (formData as any)[name] || ''}
-        onChange={onChange || handleChange}
-        className="w-full px-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
-      />
-    </div>
-  )
 
   if (fetching) {
     return (
@@ -480,13 +497,13 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Basic Information */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon={BookOpen} title="Basic Information" section="basic" />
-          <SectionContent section="basic">
-            <InputField label="Product Name" name="name" required placeholder="e.g., Blue Umrao Coffee Mug Set" />
-            <InputField label="Slug (auto-generated)" name="slug" placeholder="blue-umrao-coffee-mug-set" />
+          <SectionHeader icon={BookOpen} title="Basic Information" section="basic" isExpanded={expandedSections["basic"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["basic"]}>
+            <InputField label="Product Name" name="name" required placeholder="e.g., Blue Umrao Coffee Mug Set" value={formData["name"] || ''} onChange={handleChange} />
+            <InputField label="Slug (auto-generated)" name="slug" placeholder="blue-umrao-coffee-mug-set" value={formData["slug"] || ''} onChange={handleChange} />
             <div className="grid grid-cols-2 gap-4">
-              <InputField label="SKU" name="sku" required placeholder="HS62" />
-              <InputField label="Brand" name="brand" placeholder="Hindustani Saudagar" />
+              <InputField label="SKU" name="sku" required placeholder="HS62" value={formData["sku"] || ''} onChange={handleChange} />
+              <InputField label="Brand" name="brand" placeholder="Hindustani Saudagar" value={formData["brand"] || ''} onChange={handleChange} />
             </div>
             <div>
               <label className="block text-sm text-muted-foreground mb-2">
@@ -514,8 +531,8 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
 
         {/* Categories */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon={Tag} title="Categories" section="categories" badge={`Selected: ${selectedCategories.length}/5`} />
-          <SectionContent section="categories">
+          <SectionHeader icon={Tag} title="Categories" section="categories" badge={`Selected: ${selectedCategories.length}/5`} isExpanded={expandedSections["categories"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["categories"]}>
             <div>
               <label className="block text-sm text-muted-foreground mb-2">
                 Select Categories <span className="text-red-500">*</span>
@@ -557,11 +574,11 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
 
         {/* Pricing */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon="₹" title="Pricing" section="pricing" />
-          <SectionContent section="pricing">
+          <SectionHeader icon="₹" title="Pricing" section="pricing" isExpanded={expandedSections["pricing"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["pricing"]}>
             <div className="grid grid-cols-2 gap-4">
-              <InputField label="Selling Price (₹)" name="price" type="number" required step="0.01" min="0" placeholder="339" />
-              <InputField label="Original Price / MRP (₹)" name="original_price" type="number" step="0.01" min="0" placeholder="800" />
+              <InputField label="Selling Price (₹)" name="price" type="number" required step="0.01" min="0" placeholder="339" value={formData["price"] || ''} onChange={handleChange} />
+              <InputField label="Original Price / MRP (₹)" name="original_price" type="number" step="0.01" min="0" placeholder="800" value={formData["original_price"] || ''} onChange={handleChange} />
             </div>
             {formData.price && formData.original_price && parseFloat(formData.original_price) > parseFloat(formData.price) && (
               <div className="bg-terracotta/10 text-terracotta px-4 py-2 rounded-xl text-sm">
@@ -573,10 +590,10 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
 
         {/* Inventory */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon={Eye} title="Inventory" section="inventory" />
-          <SectionContent section="inventory">
+          <SectionHeader icon={Eye} title="Inventory" section="inventory" isExpanded={expandedSections["inventory"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["inventory"]}>
             <div className="grid grid-cols-2 gap-4">
-              <InputField label="Stock Quantity" name="stock" type="number" required min="0" placeholder="10" />
+              <InputField label="Stock Quantity" name="stock" type="number" required min="0" placeholder="10" value={formData["stock"] || ''} onChange={handleChange} />
               <div className="flex items-center gap-3 pt-6">
                 <input
                   type="checkbox"
@@ -593,24 +610,24 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
 
         {/* Specifications */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon={Shield} title="Product Specifications" section="specifications" />
-          <SectionContent section="specifications">
+          <SectionHeader icon={Shield} title="Product Specifications" section="specifications" isExpanded={expandedSections["specifications"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["specifications"]}>
             <div className="grid grid-cols-2 gap-4">
-              <InputField label="Material" name="material" placeholder="Ceramic" />
-              <InputField label="Contents" name="contents" placeholder="2 coffee mugs" />
-              <InputField label="Capacity" name="capacity" placeholder="275ml" />
-              <InputField label="Dimensions (L x W x H)" name="dimensions" placeholder="10cm x 8cm x 12cm" />
-              <InputField label="Weight" name="weight" placeholder="500g" />
-              <InputField label="Color" name="color" placeholder="Blue & White" />
+              <InputField label="Material" name="material" placeholder="Ceramic" value={formData["material"] || ''} onChange={handleChange} />
+              <InputField label="Contents" name="contents" placeholder="2 coffee mugs" value={formData["contents"] || ''} onChange={handleChange} />
+              <InputField label="Capacity" name="capacity" placeholder="275ml" value={formData["capacity"] || ''} onChange={handleChange} />
+              <InputField label="Dimensions (L x W x H)" name="dimensions" placeholder="10cm x 8cm x 12cm" value={formData["dimensions"] || ''} onChange={handleChange} />
+              <InputField label="Weight" name="weight" placeholder="500g" value={formData["weight"] || ''} onChange={handleChange} />
+              <InputField label="Color" name="color" placeholder="Blue & White" value={formData["color"] || ''} onChange={handleChange} />
             </div>
-            <InputField label="Package Includes" name="package_includes" placeholder="2 mugs, gift box" />
+            <InputField label="Package Includes" name="package_includes" placeholder="2 mugs, gift box" value={formData["package_includes"] || ''} onChange={handleChange} />
           </SectionContent>
         </div>
 
         {/* Safety Features */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon={Shield} title="Safety Features" section="safety" />
-          <SectionContent section="safety">
+          <SectionHeader icon={Shield} title="Safety Features" section="safety" isExpanded={expandedSections["safety"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["safety"]}>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {safetyFeaturesList.map((feature) => (
                 <label
@@ -636,8 +653,8 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
 
         {/* Product Features */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon={Palette} title="Product Features" section="features" badge={features.length.toString()} />
-          <SectionContent section="features">
+          <SectionHeader icon={Palette} title="Product Features" section="features" badge={features.length.toString()} isExpanded={expandedSections["features"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["features"]}>
             <button
               type="button"
               onClick={addFeature}
@@ -693,8 +710,8 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
 
         {/* Rich Content Sections */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon={BookOpen} title="Rich Content Sections" section="richContent" />
-          <SectionContent section="richContent">
+          <SectionHeader icon={BookOpen} title="Rich Content Sections" section="richContent" isExpanded={expandedSections["richContent"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["richContent"]}>
             <div>
               <label className="block text-sm text-muted-foreground mb-2">Product Story</label>
               <p className="text-xs text-muted-foreground mb-2">"Tradition in Form, Art in Soul" section</p>
@@ -736,8 +753,8 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
 
         {/* Images */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon={ImageIcon} title="Images" section="images" badge={`${images.length} uploaded`} />
-          <SectionContent section="images">
+          <SectionHeader icon={ImageIcon} title="Images" section="images" badge={`${images.length} uploaded`} isExpanded={expandedSections["images"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["images"]}>
             <div>
               <label className="block text-sm text-muted-foreground mb-2">
                 Product Gallery Images <span className="text-red-500">*</span>
@@ -833,9 +850,9 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
 
         {/* SEO */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon={Globe} title="SEO" section="seo" />
-          <SectionContent section="seo">
-            <InputField label="Meta Title" name="meta_title" placeholder="Product name for search engines" />
+          <SectionHeader icon={Globe} title="SEO" section="seo" isExpanded={expandedSections["seo"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["seo"]}>
+            <InputField label="Meta Title" name="meta_title" placeholder="Product name for search engines" value={formData["meta_title"] || ''} onChange={handleChange} />
             <div>
               <label className="block text-sm text-muted-foreground mb-2">Meta Description</label>
               <textarea
@@ -852,8 +869,8 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
 
         {/* Variations */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon={Palette} title="Color Variations" section="variations" badge={variations.length.toString()} />
-          <SectionContent section="variations">
+          <SectionHeader icon={Palette} title="Color Variations" section="variations" badge={variations.length.toString()} isExpanded={expandedSections["variations"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["variations"]}>
             <p className="text-sm text-muted-foreground mb-4">
               Add color variations for this product. Each variation can have its own price, stock, and image.
             </p>
@@ -943,8 +960,8 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
 
         {/* Status */}
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
-          <SectionHeader icon={formData.is_active ? Eye : EyeOff} title="Status" section="status" />
-          <SectionContent section="status">
+          <SectionHeader icon={formData.is_active ? Eye : EyeOff} title="Status" section="status" isExpanded={expandedSections["status"]} onToggle={toggleSection} />
+          <SectionContent isVisible={expandedSections["status"]}>
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
