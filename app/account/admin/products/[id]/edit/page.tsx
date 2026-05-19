@@ -313,30 +313,43 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
         package_includes: formData.package_includes,
       }
 
-      const { material, contents, capacity, dimensions, weight, color, package_includes, ...restFormData } = formData
+      const { material, contents, capacity, dimensions, weight, color, package_includes, category_id, ...restFormData } = formData
+
+      // Clean up undefined/null values
+      const cleanData = {
+        ...restFormData,
+        price: parseFloat(formData.price) || 0,
+        original_price: formData.original_price ? parseFloat(formData.original_price) : null,
+        stock: parseInt(formData.stock) || 0,
+        images: images.length > 0 ? images : [],
+        section_images: sectionImages.length > 0 ? sectionImages : [],
+        banner_image: bannerImage || null,
+        tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
+        category_ids: selectedCategories.length > 0 ? selectedCategories : [],
+        specifications,
+        features: features.length > 0 ? features : [],
+        has_variations: variations.length > 0,
+        variations: variations.map((v) => ({
+          color_name: v.color_name || null,
+          color_hex: v.color_hex || '#000000',
+          sku: v.sku || '',
+          price: v.price ? parseFloat(v.price) : null,
+          stock: parseInt(v.stock) || 0,
+          image_url: v.image_url || null,
+        })),
+      }
+
+      // Remove any undefined values
+      Object.keys(cleanData).forEach((key) => {
+        if ((cleanData as any)[key] === undefined) {
+          delete (cleanData as any)[key]
+        }
+      })
 
       const res = await fetch(`/api/products/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...restFormData,
-          price: parseFloat(formData.price),
-          original_price: formData.original_price ? parseFloat(formData.original_price) : null,
-          stock: parseInt(formData.stock) || 0,
-          images,
-          section_images: sectionImages,
-          banner_image: bannerImage || null,
-          tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
-          category_ids: selectedCategories,
-          specifications,
-          features,
-          has_variations: variations.length > 0,
-          variations: variations.map((v) => ({
-            ...v,
-            price: v.price ? parseFloat(v.price) : null,
-            stock: parseInt(v.stock) || 0,
-          })),
-        }),
+        body: JSON.stringify(cleanData),
       })
 
       if (!res.ok) {
