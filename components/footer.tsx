@@ -3,26 +3,22 @@ import { Instagram, Facebook, Twitter, MapPin, Mail, Phone } from "lucide-react"
 import { Reveal } from "@/components/reveal"
 
 const shopLinks = [
-  { label: "All Products", href: "#shop" },
-  { label: "New Arrivals", href: "#new" },
-  { label: "Bestsellers", href: "#bestsellers" },
-  { label: "Gift Cards", href: "#gifts" },
-  { label: "Collections", href: "#collections" },
+  { label: "All Products", href: "/products" },
+  { label: "New Arrivals", href: "/products?sortBy=created_at&sortOrder=desc" },
+  { label: "Bestsellers", href: "/products?sortBy=price&sortOrder=desc" },
 ]
 
 const helpLinks = [
-  { label: "Shipping & Returns", href: "#shipping" },
-  { label: "FAQs", href: "#faq" },
-  { label: "Track Order", href: "#track" },
-  { label: "Care Guide", href: "#care" },
-  { label: "Contact Us", href: "#contact" },
+  { label: "Shipping Policy", href: "/shipping" },
+  { label: "Returns & Refunds", href: "/returns" },
+  { label: "Contact Us", href: "/contact" },
+  { label: "FAQs", href: "/contact" },
 ]
 
 const companyLinks = [
-  { label: "Our Story", href: "#story" },
-  { label: "Artisan Partners", href: "#artisans" },
-  { label: "Sustainability", href: "#sustainability" },
-  { label: "Press", href: "#press" },
+  { label: "Our Story", href: "/about" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms & Conditions", href: "/terms" },
 ]
 
 const paymentMethods = [
