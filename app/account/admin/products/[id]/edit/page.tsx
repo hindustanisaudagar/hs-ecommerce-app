@@ -383,16 +383,23 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
       // Deep clean function to remove all 'undefined' strings and undefined values
       const deepClean = (obj: any): any => {
         if (obj === null || obj === undefined || obj === 'undefined') return undefined
-        if (typeof obj === 'string' && obj === 'undefined') return undefined
+        if (typeof obj === 'string') {
+          if (obj === 'undefined' || obj === 'null') return undefined
+          // Validate UUID format
+          if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(obj)) {
+            return obj
+          }
+          return obj
+        }
         if (Array.isArray(obj)) {
-          const cleaned = obj.map(item => deepClean(item)).filter(item => item !== undefined)
+          const cleaned = obj.map(item => deepClean(item)).filter(item => item !== undefined && item !== null && item !== 'undefined' && item !== 'null')
           return cleaned.length > 0 ? cleaned : []
         }
         if (typeof obj === 'object') {
           const cleaned: any = {}
           for (const [key, value] of Object.entries(obj)) {
             const cleanValue = deepClean(value)
-            if (cleanValue !== undefined && cleanValue !== 'undefined') {
+            if (cleanValue !== undefined && cleanValue !== 'undefined' && cleanValue !== 'null') {
               cleaned[key] = cleanValue
             }
           }
@@ -422,26 +429,36 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
         section_images: sectionImages.length > 0 ? sectionImages : [],
         banner_image: bannerImage || null,
         tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
-        category_ids: selectedCategories.filter(c => c && c !== 'undefined' && c !== 'null').length > 0 
-          ? selectedCategories.filter(c => c && c !== 'undefined' && c !== 'null') 
-          : [],
+        category_ids: selectedCategories
+          .filter(c => c && typeof c === 'string' && c.length === 36)
+          .map(c => c.trim()),
         specifications,
-        features: features.length > 0 ? features : [],
+        features: features
+          .filter(f => f.title)
+          .map(f => ({
+            title: f.title,
+            icon_url: f.icon_url || null,
+            description: f.description || null,
+          })),
         has_variations: variations.length > 0,
-        variations: variations.map((v) => ({
-          color_name: v.color_name || null,
-          color_hex: v.color_hex || '#000000',
-          sku: v.sku || '',
-          price: v.price ? parseFloat(v.price) : null,
-          stock: parseInt(v.stock) || 0,
-          image_url: v.image_url || null,
-        })),
+        variations: variations
+          .filter(v => v.color_name || v.sku || v.price)
+          .map((v) => ({
+            ...(v.id && v.id !== 'undefined' ? { id: v.id } : {}),
+            color_name: v.color_name || null,
+            color_hex: v.color_hex || '#000000',
+            sku: v.sku || '',
+            price: v.price ? parseFloat(v.price) : null,
+            stock: parseInt(v.stock) || 0,
+            image_url: v.image_url || null,
+          })),
       }
 
       // Deep clean the entire payload
       const finalData = deepClean(cleanData)
 
       console.log('Sending to API:', JSON.stringify(finalData, null, 2))
+      console.log('Category IDs being sent:', finalData.category_ids)
 
       const res = await fetch(`/api/products/${id}`, {
         method: 'PUT',
@@ -450,8 +467,9 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
       })
 
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Failed to update product')
+        const errorData = await res.json()
+        console.error('API Error:', errorData)
+        throw new Error(errorData.error || errorData.details || 'Failed to update product')
       }
 
       router.push('/account/admin/products')
