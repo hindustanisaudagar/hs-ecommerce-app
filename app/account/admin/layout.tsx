@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Package, ShoppingCart, FolderOpen, LayoutDashboard, ArrowLeft, Shield } from 'lucide-react'
+import { Package, ShoppingCart, FolderOpen, LayoutDashboard, ArrowLeft, Shield, Settings } from 'lucide-react'
 
 const adminNav = [
   { href: '/account/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/account/admin/products', label: 'Products', icon: Package },
   { href: '/account/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/account/admin/categories', label: 'Categories', icon: FolderOpen },
+  { href: '/account/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 export default function AdminLayout({
