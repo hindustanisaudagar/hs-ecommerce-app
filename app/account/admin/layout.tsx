@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Package, ShoppingCart, FolderOpen, LayoutDashboard, ArrowLeft, Shield, Settings } from 'lucide-react'
+import { Package, ShoppingCart, FolderOpen, LayoutDashboard, ArrowLeft, Shield, Settings, Home } from 'lucide-react'
 
 const adminNav = [
   { href: '/account/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -85,7 +85,14 @@ export default function AdminLayout({
             })}
           </nav>
 
-          <div className="absolute bottom-6 left-6 right-6">
+          <div className="absolute bottom-6 left-6 right-6 space-y-2">
+            <Link
+              href="/"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-cream/70 hover:bg-cream/10 hover:text-cream transition-colors"
+            >
+              <Home className="w-5 h-5" />
+              <span className="text-sm">Back to Home</span>
+            </Link>
             <Link
               href="/account"
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-cream/70 hover:bg-cream/10 hover:text-cream transition-colors"
