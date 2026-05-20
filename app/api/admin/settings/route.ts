@@ -48,10 +48,17 @@ export async function POST(request: Request) {
     }
     
     const body = await request.json()
+    console.log('Saving settings:', JSON.stringify(body, null, 2))
+    
     await updateAppSettings(body)
     
+    console.log('Settings saved successfully')
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Settings save error:', error)
+    return NextResponse.json({ 
+      error: error.message || 'Failed to save settings',
+      details: error.toString()
+    }, { status: 500 })
   }
 }

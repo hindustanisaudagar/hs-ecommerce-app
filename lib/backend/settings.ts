@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 
 export interface AppSettings {
   backend_provider: 'supabase' | 'woocommerce' | 'both'
@@ -38,7 +37,7 @@ export async function getAppSettings(): Promise<AppSettings> {
 }
 
 export async function updateAppSettings(settings: Partial<AppSettings>): Promise<void> {
-  const supabase = createAdminClient()
+  const supabase = await createClient()
   
   for (const [key, value] of Object.entries(settings)) {
     const { error } = await supabase
@@ -51,7 +50,7 @@ export async function updateAppSettings(settings: Partial<AppSettings>): Promise
     
     if (error) {
       console.error(`Failed to update setting ${key}:`, error)
-      throw error
+      throw new Error(`Failed to save ${key}: ${error.message}`)
     }
   }
 }

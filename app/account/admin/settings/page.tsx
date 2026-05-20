@@ -67,7 +67,11 @@ export default function AdminSettingsPage() {
         body: JSON.stringify(settings),
       })
       
-      if (!res.ok) throw new Error('Failed to save settings')
+      const data = await res.json()
+      
+      if (!res.ok) {
+        throw new Error(data.error || data.details || 'Failed to save settings')
+      }
       
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
