@@ -122,15 +122,15 @@ export function Footer() {
                 <div className="space-y-4 text-[15px] text-cream/60 font-light">
                   <p className="flex items-start gap-3">
                     <Mail className="w-4 h-4 mt-0.5 flex-shrink-0 text-terracotta-light" strokeWidth={1.5} />
-                    hello@hindustanisaudagar.com
+                    hindustanisaudagar@gmail.com
                   </p>
                   <p className="flex items-start gap-3">
                     <Phone className="w-4 h-4 mt-0.5 flex-shrink-0 text-terracotta-light" strokeWidth={1.5} />
-                    +91 98765 43210
+                    +91 8882667424
                   </p>
                   <p className="flex items-start gap-3">
                     <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-terracotta-light" strokeWidth={1.5} />
-                    Jaipur, Rajasthan, India
+                    Plot no 13 First floor back side Ashoka Enclave sector 35 Kanishka Residency Faridabad, 121003 Haryana
                   </p>
                 </div>
                 <div className="flex gap-3 mt-8">

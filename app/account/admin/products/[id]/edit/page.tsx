@@ -382,28 +382,24 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
     try {
       // Deep clean function to remove all 'undefined' strings and undefined values
       const deepClean = (obj: any): any => {
-        if (obj === null || obj === undefined || obj === 'undefined') return undefined
+        if (obj === null || obj === undefined) return undefined
         if (typeof obj === 'string') {
-          if (obj === 'undefined' || obj === 'null') return undefined
-          // Validate UUID format
-          if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(obj)) {
-            return obj
-          }
+          if (obj === 'undefined' || obj === 'null' || obj === '') return undefined
           return obj
         }
         if (Array.isArray(obj)) {
-          const cleaned = obj.map(item => deepClean(item)).filter(item => item !== undefined && item !== null && item !== 'undefined' && item !== 'null')
+          const cleaned = obj.map(item => deepClean(item)).filter(item => item !== undefined)
           return cleaned.length > 0 ? cleaned : []
         }
         if (typeof obj === 'object') {
           const cleaned: any = {}
           for (const [key, value] of Object.entries(obj)) {
             const cleanValue = deepClean(value)
-            if (cleanValue !== undefined && cleanValue !== 'undefined' && cleanValue !== 'null') {
+            if (cleanValue !== undefined) {
               cleaned[key] = cleanValue
             }
           }
-          return cleaned
+          return Object.keys(cleaned).length > 0 ? cleaned : undefined
         }
         return obj
       }
@@ -430,7 +426,11 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
         banner_image: bannerImage || null,
         tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
         category_ids: selectedCategories
-          .filter(c => c && typeof c === 'string' && c.length === 36)
+          .filter(c => {
+            if (!c || typeof c !== 'string') return false
+            const trimmed = c.trim()
+            return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)
+          })
           .map(c => c.trim()),
         specifications,
         features: features
@@ -443,15 +443,21 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
         has_variations: variations.length > 0,
         variations: variations
           .filter(v => v.color_name || v.sku || v.price)
-          .map((v) => ({
-            ...(v.id && v.id !== 'undefined' ? { id: v.id } : {}),
-            color_name: v.color_name || null,
-            color_hex: v.color_hex || '#000000',
-            sku: v.sku || '',
-            price: v.price ? parseFloat(v.price) : null,
-            stock: parseInt(v.stock) || 0,
-            image_url: v.image_url || null,
-          })),
+          .map((v) => {
+            const base = {
+              color_name: v.color_name || null,
+              color_hex: v.color_hex || '#000000',
+              sku: v.sku || '',
+              price: v.price ? parseFloat(v.price) : null,
+              stock: parseInt(v.stock) || 0,
+              image_url: v.image_url || null,
+            }
+            // Only include id if it's a valid UUID
+            if (v.id && typeof v.id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v.id)) {
+              return { id: v.id, ...base }
+            }
+            return base
+          }),
       }
 
       // Deep clean the entire payload
