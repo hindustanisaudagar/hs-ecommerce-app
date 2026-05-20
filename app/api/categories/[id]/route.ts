@@ -4,9 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -26,7 +27,7 @@ export async function DELETE(
     }
 
     const backend = await createBackend()
-    await backend.deleteCategory(params.id)
+    await backend.deleteCategory(id)
 
     return NextResponse.json({ success: true })
   } catch (error: any) {

@@ -4,11 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const backend = await createBackend()
-    const data = await backend.getProduct(params.id)
+    const data = await backend.getProduct(id)
     return NextResponse.json(data)
   } catch (error: any) {
     return NextResponse.json(
@@ -20,9 +21,10 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -44,7 +46,7 @@ export async function PUT(
     const body = await request.json()
     const backend = await createBackend()
 
-    const product = await backend.updateProduct(params.id, body)
+    const product = await backend.updateProduct(id, body)
 
     return NextResponse.json(product)
   } catch (error: any) {

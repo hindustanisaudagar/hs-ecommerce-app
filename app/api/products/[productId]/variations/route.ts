@@ -6,11 +6,12 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(
   request: Request,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
+    const { productId } = await params
     const backend = await createBackend()
-    const variations = await backend.getProductVariations(params.productId)
+    const variations = await backend.getProductVariations(productId)
 
     return NextResponse.json({ variations })
   } catch (error: any) {
@@ -23,9 +24,10 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
+    const { productId } = await params
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -47,15 +49,15 @@ export async function POST(
     const body = await request.json()
     const backend = await createBackend()
 
-    const product = await backend.getProduct(params.productId)
-    const currentVariations = await backend.getProductVariations(params.productId)
+    const product = await backend.getProduct(productId)
+    const currentVariations = await backend.getProductVariations(productId)
     
-    const updatedProduct = await backend.updateProduct(params.productId, {
+    const updatedProduct = await backend.updateProduct(productId, {
       ...product,
-      variations: [...currentVariations, { ...body, product_id: params.productId }],
+      variations: [...currentVariations, { ...body, product_id: productId }],
     })
 
-    const newVariations = await backend.getProductVariations(params.productId)
+    const newVariations = await backend.getProductVariations(productId)
     const newVariation = newVariations[newVariations.length - 1]
 
     return NextResponse.json(newVariation, { status: 201 })
@@ -69,9 +71,10 @@ export async function POST(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { productId: string; variationId: string } }
+  { params }: { params: Promise<{ productId: string; variationId: string }> }
 ) {
   try {
+    const { productId, variationId } = await params
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -93,20 +96,20 @@ export async function PUT(
     const body = await request.json()
     const backend = await createBackend()
 
-    const product = await backend.getProduct(params.productId)
-    const variations = await backend.getProductVariations(params.productId)
+    const product = await backend.getProduct(productId)
+    const variations = await backend.getProductVariations(productId)
     
     const updatedVariations = variations.map((v: any) => 
-      v.id === params.variationId ? { ...v, ...body } : v
+      v.id === variationId ? { ...v, ...body } : v
     )
 
-    await backend.updateProduct(params.productId, {
+    await backend.updateProduct(productId, {
       ...product,
       variations: updatedVariations,
     })
 
-    const newVariations = await backend.getProductVariations(params.productId)
-    const updatedVariation = newVariations.find((v: any) => v.id === params.variationId)
+    const newVariations = await backend.getProductVariations(productId)
+    const updatedVariation = newVariations.find((v: any) => v.id === variationId)
 
     return NextResponse.json(updatedVariation)
   } catch (error: any) {
@@ -119,9 +122,10 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { productId: string; variationId: string } }
+  { params }: { params: Promise<{ productId: string; variationId: string }> }
 ) {
   try {
+    const { productId, variationId } = await params
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -142,12 +146,12 @@ export async function DELETE(
 
     const backend = await createBackend()
 
-    const product = await backend.getProduct(params.productId)
-    const variations = await backend.getProductVariations(params.productId)
+    const product = await backend.getProduct(productId)
+    const variations = await backend.getProductVariations(productId)
     
-    const updatedVariations = variations.filter((v: any) => v.id !== params.variationId)
+    const updatedVariations = variations.filter((v: any) => v.id !== variationId)
 
-    await backend.updateProduct(params.productId, {
+    await backend.updateProduct(productId, {
       ...product,
       variations: updatedVariations,
     })
