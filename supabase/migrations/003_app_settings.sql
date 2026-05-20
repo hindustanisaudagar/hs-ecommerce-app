@@ -17,11 +17,21 @@ ON CONFLICT (key) DO NOTHING;
 -- Enable RLS
 ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
 
--- Allow admins to read/write settings
-CREATE POLICY "Admins can manage settings"
+-- Allow admins to read settings
+CREATE POLICY "Admins can read settings"
+  ON app_settings
+  FOR SELECT
+  USING (
+    auth.uid() IN (
+      SELECT id FROM users WHERE role = 'admin'
+    )
+  );
+
+-- Allow admins to insert/update/delete settings
+CREATE POLICY "Admins can write settings"
   ON app_settings
   FOR ALL
-  USING (
+  WITH CHECK (
     auth.uid() IN (
       SELECT id FROM users WHERE role = 'admin'
     )

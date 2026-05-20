@@ -78,6 +78,9 @@ export default function AdminSettingsPage() {
       
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
+      
+      // Refresh settings from database to ensure UI matches saved state
+      await fetchSettings()
     } catch (error: any) {
       alert(error.message)
     } finally {
