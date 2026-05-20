@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createBackend } from '@/lib/backend'
 import { createClient } from '@/lib/supabase/server'
 
 export async function DELETE(
@@ -24,23 +25,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const { id } = params
-
-    // First delete all subcategories
-    const { error: subcategoriesError } = await supabase
-      .from('categories')
-      .delete()
-      .eq('parent_id', id)
-
-    if (subcategoriesError) throw subcategoriesError
-
-    // Then delete the main category
-    const { error } = await supabase
-      .from('categories')
-      .delete()
-      .eq('id', id)
-
-    if (error) throw error
+    const backend = await createBackend()
+    await backend.deleteCategory(params.id)
 
     return NextResponse.json({ success: true })
   } catch (error: any) {

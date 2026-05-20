@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createBackend } from '@/lib/backend'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -17,53 +18,22 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
 
-    const supabase = await createClient()
+    const backend = await createBackend()
 
-    let query = supabase
-      .from('products')
-      .select('*, category:categories(name, slug)')
-      .eq('is_active', true)
-
-    if (slug) {
-      query = query.eq('slug', slug)
-    }
-
-    if (category) {
-      query = query.eq('category_id', category)
-    }
-
-    if (categoryIds) {
-      const ids = categoryIds.split(',')
-      query = query.overlaps('category_ids', ids)
-    }
-
-    if (search) {
-      query = query.ilike('name', `%${search}%`)
-    }
-
-    if (minPrice) {
-      query = query.gte('price', minPrice)
-    }
-
-    if (maxPrice) {
-      query = query.lte('price', maxPrice)
-    }
-
-    query = query
-      .order(sortBy, { ascending: sortOrder === 'asc' })
-      .range((page - 1) * limit, page * limit - 1)
-
-    const { data, error, count } = await query
-
-    if (error) throw error
-
-    return NextResponse.json({
-      products: data || [],
-      total: count || 0,
+    const result = await backend.getProducts({
+      category: category || undefined,
+      categoryIds: categoryIds ? categoryIds.split(',') : undefined,
+      search: search || undefined,
+      slug: slug || undefined,
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      sortBy,
+      sortOrder: sortOrder as 'asc' | 'desc',
       page,
       limit,
-      totalPages: Math.ceil((count || 0) / limit),
     })
+
+    return NextResponse.json(result)
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },
@@ -93,34 +63,9 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
+    const backend = await createBackend()
 
-    // Extract variations from body
-    const { variations, ...productData } = body
-
-    // Insert product
-    const { data: product, error: productError } = await supabase
-      .from('products')
-      .insert([productData])
-      .select()
-      .single()
-
-    if (productError) throw productError
-
-    // Insert variations if any
-    if (variations && variations.length > 0 && product) {
-      const variationsWithProductId = variations.map((v: any) => ({
-        ...v,
-        product_id: product.id,
-      }))
-
-      const { error: variationsError } = await supabase
-        .from('product_variations')
-        .insert(variationsWithProductId)
-
-      if (variationsError) {
-        console.error('Failed to insert variations:', variationsError)
-      }
-    }
+    const product = await backend.createProduct(body)
 
     return NextResponse.json(product, { status: 201 })
   } catch (error: any) {

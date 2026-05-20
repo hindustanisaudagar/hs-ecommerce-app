@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createBackend } from '@/lib/backend'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -6,21 +7,16 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: Request) {
   try {
     const supabase = await createClient()
-
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
       return NextResponse.json({ items: [] })
     }
 
-    const { data, error } = await supabase
-      .from('cart_items')
-      .select('*, product:products(*)')
-      .eq('user_id', user.id)
+    const backend = await createBackend()
+    const items = await backend.getCart(user.id)
 
-    if (error) throw error
-
-    return NextResponse.json({ items: data || [] })
+    return NextResponse.json({ items })
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },
@@ -32,7 +28,6 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
-
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -40,35 +35,10 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { product_id, quantity = 1 } = body
+    const { product_id, quantity = 1, variation_id } = body
 
-    const { data: existingItem } = await supabase
-      .from('cart_items')
-      .select('id, quantity')
-      .eq('user_id', user.id)
-      .eq('product_id', product_id)
-      .single()
-
-    if (existingItem) {
-      const { data, error } = await supabase
-        .from('cart_items')
-        .update({ quantity: existingItem.quantity + quantity })
-        .eq('id', existingItem.id)
-        .select('*, product:products(*)')
-        .single()
-
-      if (error) throw error
-
-      return NextResponse.json(data)
-    }
-
-    const { data, error } = await supabase
-      .from('cart_items')
-      .insert([{ user_id: user.id, product_id, quantity }])
-      .select('*, product:products(*)')
-      .single()
-
-    if (error) throw error
+    const backend = await createBackend()
+    const data = await backend.addToCart(user.id, product_id, quantity, variation_id)
 
     return NextResponse.json(data, { status: 201 })
   } catch (error: any) {
@@ -82,7 +52,6 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const supabase = await createClient()
-
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -92,29 +61,18 @@ export async function PUT(request: Request) {
     const body = await request.json()
     const { product_id, quantity } = body
 
+    const backend = await createBackend()
+
     if (quantity <= 0) {
-      const { error } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('product_id', product_id)
-
-      if (error) throw error
-
+      await backend.removeFromCart(user.id, product_id)
       return NextResponse.json({ success: true })
     }
 
-    const { data, error } = await supabase
-      .from('cart_items')
-      .update({ quantity })
-      .eq('user_id', user.id)
-      .eq('product_id', product_id)
-      .select('*, product:products(*)')
-      .single()
+    await backend.updateCart(user.id, product_id, quantity)
+    const items = await backend.getCart(user.id)
+    const updatedItem = items.find((item: any) => item.product_id === product_id)
 
-    if (error) throw error
-
-    return NextResponse.json(data)
+    return NextResponse.json(updatedItem || { success: true })
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },
@@ -126,7 +84,6 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const supabase = await createClient()
-
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -140,13 +97,8 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Product ID required' }, { status: 400 })
     }
 
-    const { error } = await supabase
-      .from('cart_items')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('product_id', product_id)
-
-    if (error) throw error
+    const backend = await createBackend()
+    await backend.removeFromCart(user.id, product_id)
 
     return NextResponse.json({ success: true })
   } catch (error: any) {

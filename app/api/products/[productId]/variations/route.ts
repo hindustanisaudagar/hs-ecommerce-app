@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createBackend } from '@/lib/backend'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -8,18 +9,10 @@ export async function GET(
   { params }: { params: { productId: string } }
 ) {
   try {
-    const supabase = await createClient()
+    const backend = await createBackend()
+    const variations = await backend.getProductVariations(params.productId)
 
-    const { data, error } = await supabase
-      .from('product_variations')
-      .select('*')
-      .eq('product_id', params.productId)
-      .eq('is_active', true)
-      .order('created_at', { ascending: true })
-
-    if (error) throw error
-
-    return NextResponse.json({ variations: data || [] })
+    return NextResponse.json({ variations })
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },
@@ -52,16 +45,20 @@ export async function POST(
     }
 
     const body = await request.json()
+    const backend = await createBackend()
 
-    const { data, error } = await supabase
-      .from('product_variations')
-      .insert([{ ...body, product_id: params.productId }])
-      .select()
-      .single()
+    const product = await backend.getProduct(params.productId)
+    const currentVariations = await backend.getProductVariations(params.productId)
+    
+    const updatedProduct = await backend.updateProduct(params.productId, {
+      ...product,
+      variations: [...currentVariations, { ...body, product_id: params.productId }],
+    })
 
-    if (error) throw error
+    const newVariations = await backend.getProductVariations(params.productId)
+    const newVariation = newVariations[newVariations.length - 1]
 
-    return NextResponse.json(data, { status: 201 })
+    return NextResponse.json(newVariation, { status: 201 })
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },
@@ -94,18 +91,24 @@ export async function PUT(
     }
 
     const body = await request.json()
+    const backend = await createBackend()
 
-    const { data, error } = await supabase
-      .from('product_variations')
-      .update(body)
-      .eq('id', params.variationId)
-      .eq('product_id', params.productId)
-      .select()
-      .single()
+    const product = await backend.getProduct(params.productId)
+    const variations = await backend.getProductVariations(params.productId)
+    
+    const updatedVariations = variations.map((v: any) => 
+      v.id === params.variationId ? { ...v, ...body } : v
+    )
 
-    if (error) throw error
+    await backend.updateProduct(params.productId, {
+      ...product,
+      variations: updatedVariations,
+    })
 
-    return NextResponse.json(data)
+    const newVariations = await backend.getProductVariations(params.productId)
+    const updatedVariation = newVariations.find((v: any) => v.id === params.variationId)
+
+    return NextResponse.json(updatedVariation)
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },
@@ -137,13 +140,17 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const { error } = await supabase
-      .from('product_variations')
-      .delete()
-      .eq('id', params.variationId)
-      .eq('product_id', params.productId)
+    const backend = await createBackend()
 
-    if (error) throw error
+    const product = await backend.getProduct(params.productId)
+    const variations = await backend.getProductVariations(params.productId)
+    
+    const updatedVariations = variations.filter((v: any) => v.id !== params.variationId)
+
+    await backend.updateProduct(params.productId, {
+      ...product,
+      variations: updatedVariations,
+    })
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
