@@ -19,25 +19,39 @@ interface Product {
 
 export function Bestsellers() {
   const [products, setProducts] = useState<Product[]>([])
+  const [content, setContent] = useState<any>({
+    title: 'Bestsellers',
+    subtitle: 'Most Loved',
+    view_all_link: '/products',
+    view_all_text: 'View all products',
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchProducts()
+    fetchData()
   }, [])
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     try {
-      // First try to fetch products with "bestseller" tag
+      setLoading(true)
+      
+      // Fetch products
       const res = await fetch('/api/products?tag=bestseller&limit=8')
       const data = await res.json()
       
-      // If no bestsellers found, fallback to latest products
       if (data.products && data.products.length > 0) {
         setProducts(data.products)
       } else {
         const fallbackRes = await fetch('/api/products?limit=8&sortBy=created_at&sortOrder=desc')
         const fallbackData = await fallbackRes.json()
         setProducts(fallbackData.products || [])
+      }
+      
+      // Fetch section content
+      const contentRes = await fetch('/api/admin/landing-page?section=bestsellers')
+      if (contentRes.ok) {
+        const contentData = await contentRes.json()
+        if (contentData.content) setContent((prev: any) => ({ ...prev, ...contentData.content }))
       }
     } catch (error) {
       console.error('Failed to fetch products:', error)
@@ -69,17 +83,17 @@ export function Bestsellers() {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
             <div>
               <p className="text-[10px] uppercase tracking-[0.3em] text-terracotta mb-4 font-medium">
-                Most Loved
+                {content.subtitle}
               </p>
               <h2 className="font-serif text-4xl md:text-5xl font-light text-ink tracking-tight">
-                Bestsellers
+                {content.title}
               </h2>
             </div>
             <Link 
-              href="/products" 
+              href={content.view_all_link} 
               className="text-sm font-light text-ink link-underline tracking-wide flex items-center gap-2 group"
             >
-              View all products
+              {content.view_all_text}
               <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={1.5} />
             </Link>
           </div>

@@ -1,9 +1,12 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Image from "next/image"
 import Link from "next/link"
 import { Instagram, ArrowUpRight } from "lucide-react"
 import { Reveal } from "@/components/reveal"
 
-const images = [
+const defaultImages = [
   { src: "/images/instagram-1.jpg", alt: "Ceramic vase with dried flowers" },
   { src: "/images/instagram-2.jpg", alt: "Handmade mugs on shelf" },
   { src: "/images/instagram-3.jpg", alt: "Ceramic bowl with food" },
@@ -13,6 +16,39 @@ const images = [
 ]
 
 export function InstagramGallery() {
+  const [content, setContent] = useState<any>({
+    label: '@hindustanisaudagar',
+    title: 'Follow the studio',
+    follow_link: 'https://instagram.com',
+    follow_text: 'Follow us',
+    images: defaultImages,
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchContent()
+  }, [])
+
+  const fetchContent = async () => {
+    try {
+      const res = await fetch('/api/admin/landing-page?section=instagram')
+      if (res.ok) {
+        const data = await res.json()
+        if (data.content) setContent((prev: any) => ({ ...prev, ...data.content }))
+      }
+    } catch (error) {
+      console.error('Failed to fetch instagram content:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return <section className="py-24 md:py-32 bg-warm-beige/30 animate-pulse" />
+  }
+
+  const images = content.images?.length ? content.images : defaultImages
+
   return (
     <section className="py-24 md:py-32 bg-warm-beige/30 grain-texture">
       <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16">
@@ -20,37 +56,37 @@ export function InstagramGallery() {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
             <div>
               <p className="text-[10px] uppercase tracking-[0.3em] text-terracotta mb-4 font-medium">
-                @hindustanisaudagar
+                {content.label}
               </p>
               <h2 className="font-serif text-4xl md:text-5xl font-light text-ink tracking-tight">
-                Follow the <span className="italic">studio</span>
+                {content.title}
               </h2>
             </div>
             <Link 
-              href="https://instagram.com" 
+              href={content.follow_link} 
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-light text-ink link-underline tracking-wide flex items-center gap-2 group"
             >
               <Instagram className="w-4 h-4" strokeWidth={1.5} />
-              Follow us
+              {content.follow_text}
               <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={1.5} />
             </Link>
           </div>
         </Reveal>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
-          {images.map((image, index) => (
+          {images.map((image: any, index: number) => (
             <Reveal key={index} delay={index * 60}>
               <Link
-                href="https://instagram.com"
+                href={content.follow_link}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative aspect-square overflow-hidden rounded-2xl shadow-premium"
               >
                 <Image
                   src={image.src}
-                  alt={image.alt}
+                  alt={image.alt || ''}
                   fill
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                 />

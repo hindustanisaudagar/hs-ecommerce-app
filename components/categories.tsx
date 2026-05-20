@@ -16,17 +16,33 @@ interface Category {
 
 export function Categories() {
   const [categories, setCategories] = useState<Category[]>([])
+  const [content, setContent] = useState<any>({
+    title: 'Shop Your Favorite',
+    subtitle: 'Collections',
+    view_all_link: '/products',
+    view_all_text: 'View all',
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchCategories()
+    fetchData()
   }, [])
 
-  const fetchCategories = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch('/api/categories?limit=8')
-      const data = await res.json()
-      setCategories(data || [])
+      setLoading(true)
+      
+      // Fetch categories
+      const catRes = await fetch('/api/categories?limit=8')
+      const catData = await catRes.json()
+      setCategories(catData || [])
+      
+      // Fetch section content
+      const contentRes = await fetch('/api/admin/landing-page?section=categories')
+      if (contentRes.ok) {
+        const contentData = await contentRes.json()
+        if (contentData.content) setContent((prev: any) => ({ ...prev, ...contentData.content }))
+      }
     } catch (error) {
       console.error('Failed to fetch categories:', error)
     } finally {
@@ -57,17 +73,17 @@ export function Categories() {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
             <div>
               <p className="text-[10px] uppercase tracking-[0.3em] text-terracotta mb-4 font-medium">
-                Collections
+                {content.subtitle}
               </p>
               <h2 className="font-serif text-4xl md:text-5xl font-light text-ink tracking-tight">
-                Shop Your <span className="italic">Favorite</span>
+                {content.title}
               </h2>
             </div>
             <Link 
-              href="/products" 
+              href={content.view_all_link} 
               className="text-sm font-light text-ink link-underline tracking-wide flex items-center gap-2 group"
             >
-              View all
+              {content.view_all_text}
               <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={1.5} />
             </Link>
           </div>
@@ -84,10 +100,8 @@ export function Categories() {
                     fill
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   />
-                  {/* Premium gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
                   
-                  {/* Content */}
                   <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6">
                     {category.description && (
                       <p className="text-[10px] uppercase tracking-[0.2em] text-cream/70 mb-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
@@ -100,7 +114,6 @@ export function Categories() {
                     <div className="w-0 h-[1px] bg-cream/50 mt-3 group-hover:w-full transition-all duration-700 ease-out" />
                   </div>
 
-                  {/* Corner arrow */}
                   <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-cream/10 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:bg-cream/20">
                     <ArrowUpRight className="w-4 h-4 text-cream" strokeWidth={1.5} />
                   </div>
