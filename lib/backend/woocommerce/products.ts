@@ -117,7 +117,21 @@ export function createWooCommerceProducts(client: WooCommerceClient) {
       if (params.slug) wooParams.slug = params.slug
       
       const response = await client.get('products', wooParams)
-      const products = response.data
+      let products = response.data
+      
+      // Client-side filtering for SKU and color if search is provided
+      if (params.search) {
+        const searchTerm = params.search.toLowerCase()
+        products = products.filter((p: any) => {
+          const name = decodeHtmlEntities(p.name).toLowerCase()
+          const sku = (p.sku || '').toLowerCase()
+          const color = (p.meta_data?.find((m: any) => m.key === 'color')?.value || '').toLowerCase()
+          
+          return name.includes(searchTerm) || 
+                 sku.includes(searchTerm) || 
+                 color.includes(searchTerm)
+        })
+      }
       const total = parseInt(response.headers['x-wp-total'] || '0') || products.length
       
       return {

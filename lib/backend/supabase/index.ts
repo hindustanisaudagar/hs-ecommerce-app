@@ -24,7 +24,10 @@ export function createSupabaseBackend(): BackendProvider {
       }
       
       if (params.search) {
-        query = query.ilike('name', `%${params.search}%`)
+        const searchTerm = `%${params.search}%`
+        query = query.or(
+          `name.ilike.${searchTerm},sku.ilike.${searchTerm},specifications->>color.ilike.${searchTerm}`
+        )
       }
       
       if (params.minPrice) {

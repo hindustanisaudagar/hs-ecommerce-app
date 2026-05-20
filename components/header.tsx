@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, User, ShoppingBag, Menu, ChevronDown, Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Search, User, ShoppingBag, Menu, ChevronDown, Loader2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { useCart } from "@/hooks/store/use-cart"
 import { useAuth } from "@/hooks/use-auth"
@@ -35,6 +37,7 @@ const staticLinks: StaticLink[] = [
 ]
 
 export function Header() {
+  const router = useRouter()
   const getTotalItems = useCart((state) => state.getTotalItems)
   const cartCount = getTotalItems()
   const [isScrolled, setIsScrolled] = useState(false)
@@ -43,6 +46,10 @@ export function Header() {
   const [mobileOpenDropdown, setMobileOpenDropdown] = useState<string | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [searching, setSearching] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,6 +73,38 @@ export function Header() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query)
+    if (!query || query.length < 2) {
+      setSearchResults([])
+      return
+    }
+    
+    setSearching(true)
+    try {
+      const res = await fetch(`/api/products?search=${encodeURIComponent(query)}&limit=8`)
+      const data = await res.json()
+      setSearchResults(data.products || [])
+    } catch (error) {
+      console.error('Search failed:', error)
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      setSearchOpen(false)
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
+  const handleSearchResultClick = (slug: string) => {
+    setSearchOpen(false)
+    router.push(`/products/${slug}`)
   }
 
   const handleMouseEnter = (slug: string) => {
@@ -134,12 +173,91 @@ export function Header() {
 
             {/* Icons */}
             <div className="flex items-center gap-1 md:gap-2 shrink-0">
-              <button 
-                className="p-2 hover:text-terracotta transition-all duration-300 rounded-full hover:bg-warm-beige/60" 
-                aria-label="Search"
-              >
-                <Search className="w-5 h-5" strokeWidth={1.5} />
-              </button>
+              <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+                <DialogTrigger asChild>
+                  <button 
+                    className="p-2 hover:text-terracotta transition-all duration-300 rounded-full hover:bg-warm-beige/60" 
+                    aria-label="Search"
+                  >
+                    <Search className="w-5 h-5" strokeWidth={1.5} />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-2xl bg-cream border-border/50">
+                  <DialogHeader>
+                    <DialogTitle className="text-ink font-serif text-xl">Search Products</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleSearchSubmit} className="mt-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder="Search by name, SKU, or color..."
+                        value={searchQuery}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-terracotta/50"
+                        autoFocus
+                      />
+                    </div>
+                  </form>
+                  
+                  {searching && (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-terracotta" />
+                    </div>
+                  )}
+                  
+                  {searchResults.length > 0 && (
+                    <div className="mt-4 space-y-2 max-h-80 overflow-y-auto">
+                      {searchResults.map((product) => (
+                        <button
+                          key={product.id}
+                          onClick={() => handleSearchResultClick(product.slug)}
+                          className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-warm-beige/50 transition-colors text-left"
+                        >
+                          {product.images?.[0] && (
+                            <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-warm-beige shrink-0">
+                              <Image
+                                src={product.images[0]}
+                                alt={product.name}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-ink truncate">{product.name}</p>
+                            {product.sku && (
+                              <p className="text-xs text-muted-foreground font-mono">SKU: {product.sku}</p>
+                            )}
+                            {product.specifications?.color && (
+                              <p className="text-xs text-muted-foreground">Color: {product.specifications.color}</p>
+                            )}
+                          </div>
+                          <p className="text-sm font-medium text-terracotta shrink-0">
+                            ₹{product.price?.toLocaleString('en-IN')}
+                          </p>
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => {
+                          setSearchOpen(false)
+                          router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
+                        }}
+                        className="w-full text-center py-3 text-sm text-terracotta hover:text-terracotta/80 transition-colors"
+                      >
+                        View all results for "{searchQuery}"
+                      </button>
+                    </div>
+                  )}
+                  
+                  {searchQuery && searchQuery.length >= 2 && !searching && searchResults.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>No products found for "{searchQuery}"</p>
+                      <p className="text-xs mt-1">Try searching by name, SKU, or color</p>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
               
               <AuthButton />
               
@@ -301,6 +419,12 @@ export function Header() {
                         "relative flex items-center gap-1 text-[13px] font-normal transition-colors tracking-wide whitespace-nowrap group",
                         activeDropdown === category.slug ? "text-ink" : "text-ink/80 hover:text-ink"
                       )}
+                      onClick={(e) => {
+                        if (category.children?.length > 0) {
+                          e.preventDefault()
+                          handleMouseEnter(category.slug)
+                        }
+                      }}
                     >
                       <span className="uppercase">{category.name}</span>
                       {category.children?.length > 0 && (
