@@ -36,10 +36,11 @@ export async function signUpWithEmail(email: string, password: string, name: str
 
 export async function signInWithGoogle() {
   const supabase = createAuthClient()
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   return supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: `${baseUrl}/auth/callback`,
     },
   })
 }
@@ -97,8 +98,9 @@ export async function getSession() {
 
 export async function resetPassword(email: string) {
   const supabase = createAuthClient()
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   return supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/auth/reset-password`,
+    redirectTo: `${baseUrl}/auth/reset-password`,
   })
 }
 
