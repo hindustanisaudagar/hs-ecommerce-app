@@ -23,6 +23,10 @@ export function createSupabaseBackend(): BackendProvider {
         query = query.overlaps('category_ids', params.categoryIds)
       }
       
+      if (params.tag) {
+        query = query.contains('tags', [params.tag])
+      }
+      
       if (params.search) {
         const searchTerm = `%${params.search}%`
         query = query.or(
@@ -172,10 +176,16 @@ export function createSupabaseBackend(): BackendProvider {
     async getCategories(params?: CategoryQuery) {
       const supabase = await createClient()
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('categories')
         .select('*')
         .order('name')
+      
+      if (params?.limit) {
+        query = query.limit(params.limit)
+      }
+      
+      const { data, error } = await query
       
       if (error) throw error
       

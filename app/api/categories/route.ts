@@ -8,9 +8,10 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const hierarchical = searchParams.get('hierarchical') === 'true'
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined
 
     const backend = await createBackend()
-    const data = await backend.getCategories({ hierarchical })
+    const data = await backend.getCategories({ hierarchical, limit })
 
     return NextResponse.json(data)
   } catch (error: any) {

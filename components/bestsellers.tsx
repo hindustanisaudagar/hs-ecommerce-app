@@ -27,9 +27,18 @@ export function Bestsellers() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/products?limit=4&sortBy=created_at&sortOrder=desc')
+      // First try to fetch products with "bestseller" tag
+      const res = await fetch('/api/products?tag=bestseller&limit=8')
       const data = await res.json()
-      setProducts(data.products || [])
+      
+      // If no bestsellers found, fallback to latest products
+      if (data.products && data.products.length > 0) {
+        setProducts(data.products)
+      } else {
+        const fallbackRes = await fetch('/api/products?limit=8&sortBy=created_at&sortOrder=desc')
+        const fallbackData = await fallbackRes.json()
+        setProducts(fallbackData.products || [])
+      }
     } catch (error) {
       console.error('Failed to fetch products:', error)
     } finally {

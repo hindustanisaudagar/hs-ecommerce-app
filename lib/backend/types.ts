@@ -5,6 +5,7 @@ export interface ProductQuery {
   categoryIds?: string[]
   search?: string
   slug?: string
+  tag?: string
   minPrice?: number
   maxPrice?: number
   sortBy?: string
@@ -23,6 +24,7 @@ export interface ProductResponse {
 
 export interface CategoryQuery {
   hierarchical?: boolean
+  limit?: number
 }
 
 export interface OrderInput {

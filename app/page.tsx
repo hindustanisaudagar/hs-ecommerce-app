@@ -1,6 +1,7 @@
 import { Header } from "@/components/header"
 import { Hero } from "@/components/hero"
 import { Marquee } from "@/components/marquee"
+import { TrustBar } from "@/components/trust-bar"
 import { Categories } from "@/components/categories"
 import { StudioBanner } from "@/components/studio-banner"
 import { Bestsellers } from "@/components/bestsellers"
@@ -19,6 +20,7 @@ export default function Home() {
       <Header />
       <Hero />
       <Marquee />
+      <TrustBar />
       <Categories />
       <StudioBanner />
       <Bestsellers />
