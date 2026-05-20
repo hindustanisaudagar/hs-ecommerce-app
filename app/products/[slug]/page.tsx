@@ -60,7 +60,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   }
 
   const handleShare = (platform: string) => {
-    if (!product) return
+    if (!product || typeof window === 'undefined') return
     const url = encodeURIComponent(window.location.href)
     const text = encodeURIComponent(product.name)
     
@@ -77,6 +77,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   }
 
   const handleCopyLink = () => {
+    if (typeof window === 'undefined') return
     navigator.clipboard.writeText(window.location.href)
     alert('Link copied!')
   }
