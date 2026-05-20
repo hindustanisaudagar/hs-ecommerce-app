@@ -21,9 +21,19 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
     
+    // Direct query to see what's in the database
+    const { data: settingsData, error: settingsError } = await supabase
+      .from('app_settings')
+      .select('key, value')
+    
+    console.log(' GET /api/admin/settings - Raw DB data:', JSON.stringify(settingsData, null, 2))
+    
     const settings = await getAppSettings()
+    console.log(' GET /api/admin/settings - Parsed settings:', JSON.stringify(settings, null, 2))
+    
     return NextResponse.json(settings)
   } catch (error: any) {
+    console.error(' GET /api/admin/settings error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

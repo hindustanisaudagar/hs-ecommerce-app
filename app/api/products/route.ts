@@ -18,6 +18,8 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
 
+    console.log(' GET /api/products - Fetching products with backend switch')
+    
     const backend = await createBackend()
 
     const result = await backend.getProducts({
@@ -33,8 +35,11 @@ export async function GET(request: Request) {
       limit,
     })
 
+    console.log(`📦 GET /api/products - Returning ${result.products.length} products`)
+
     return NextResponse.json(result)
   } catch (error: any) {
+    console.error('❌ GET /api/products error:', error)
     return NextResponse.json(
       { error: error.message },
       { status: 500 }

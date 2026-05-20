@@ -15,9 +15,11 @@ export async function getAppSettings(): Promise<AppSettings> {
     .select('key, value')
   
   if (error) {
-    console.error('Failed to fetch app settings:', error)
+    console.error(' Failed to fetch app settings:', error)
     return getDefaultSettings()
   }
+  
+  console.log(' Raw settings from DB:', JSON.stringify(data, null, 2))
   
   const settings: any = {}
   data?.forEach((row: any) => {
@@ -27,6 +29,8 @@ export async function getAppSettings(): Promise<AppSettings> {
       settings[row.key] = row.value
     }
   })
+  
+  console.log(' Parsed settings:', JSON.stringify(settings, null, 2))
   
   return {
     backend_provider: settings.backend_provider || 'supabase',
