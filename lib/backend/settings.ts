@@ -42,11 +42,14 @@ export async function updateAppSettings(settings: Partial<AppSettings>): Promise
   for (const [key, value] of Object.entries(settings)) {
     const { error } = await supabase
       .from('app_settings')
-      .upsert({
-        key,
-        value: JSON.stringify(value),
-        updated_at: new Date().toISOString(),
-      })
+      .upsert(
+        {
+          key,
+          value: JSON.stringify(value),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'key' }
+      )
     
     if (error) {
       console.error(`Failed to update setting ${key}:`, error)
