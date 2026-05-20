@@ -18,6 +18,8 @@ export default function AdminSettingsPage() {
     woocommerce_consumer_secret: '',
   })
   
+  const [debugInfo, setDebugInfo] = useState<any>(null)
+  
   useEffect(() => {
     fetchSettings()
   }, [])
@@ -28,6 +30,7 @@ export default function AdminSettingsPage() {
       if (res.ok) {
         const data = await res.json()
         setSettings(data)
+        setDebugInfo(data)
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error)
@@ -201,6 +204,22 @@ export default function AdminSettingsPage() {
                   <li>Copy Consumer Key and Secret</li>
                 </ol>
               </div>
+            </div>
+          )}
+          
+          {/* Debug Info */}
+          {debugInfo && (
+            <div className="pt-6 border-t border-border/50">
+              <h3 className="text-sm font-medium text-ink mb-3">Current Settings (from Database)</h3>
+              <div className="bg-warm-beige/30 rounded-xl p-4 text-sm font-mono">
+                <p><strong>Backend Provider:</strong> {debugInfo.backend_provider}</p>
+                <p><strong>Store URL:</strong> {debugInfo.woocommerce_url || 'Not set'}</p>
+                <p><strong>Consumer Key:</strong> {debugInfo.woocommerce_consumer_key ? 'Set ✓' : 'Not set'}</p>
+                <p><strong>Consumer Secret:</strong> {debugInfo.woocommerce_consumer_secret ? 'Set ✓' : 'Not set'}</p>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                If backend_provider shows "supabase" but you selected "WooCommerce", settings are not saving correctly.
+              </p>
             </div>
           )}
           
