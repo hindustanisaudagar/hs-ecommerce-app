@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#fff"/>
+  <path d="M70 100 Q85 60 100 80 Q115 60 130 100" fill="none" stroke="#e53e8e" stroke-width="8"/>
+  <path d="M70 100 Q85 140 100 120 Q115 140 130 100" fill="none" stroke="#f59e0b" stroke-width="8"/>
+  <text x="140" y="110" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1a1a1a">Myntra</text>
+</svg>

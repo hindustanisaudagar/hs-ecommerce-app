@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#fff"/>
+  <circle cx="100" cy="70" r="35" fill="#e31837"/>
+  <path d="M85 65 L100 50 L115 65 L115 85 L85 85 Z" fill="#fff"/>
+  <text x="100" y="130" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a" text-anchor="middle">JioMart</text>
+</svg>

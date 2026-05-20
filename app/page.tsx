@@ -9,6 +9,7 @@ import { ArtisanProcess } from "@/components/artisan-process"
 import { Reviews } from "@/components/reviews"
 import { InstagramGallery } from "@/components/instagram-gallery"
 import { Newsletter } from "@/components/newsletter"
+import { Marketplaces } from "@/components/marketplaces"
 import { Footer } from "@/components/footer"
 import { ChatButton } from "@/components/chat-button"
 
@@ -24,9 +25,10 @@ export default function Home() {
       <BrandStory />
       <ArtisanProcess />
       <Reviews />
-      <InstagramGallery />
-      <Newsletter />
-      <Footer />
+        <InstagramGallery />
+        <Newsletter />
+        <Marketplaces />
+        <Footer />
       <ChatButton />
     </main>
   )

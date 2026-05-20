@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#fff"/>
+  <circle cx="100" cy="85" r="50" fill="#f0f0f0"/>
+  <path d="M80 75 L100 55 L120 75" fill="none" stroke="#e85d26" stroke-width="4"/>
+  <text x="100" y="105" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1a1a1a" text-anchor="middle">Wooden</text>
+  <text x="100" y="125" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1a1a1a" text-anchor="middle">Street</text>
+  <text x="100" y="145" font-family="Arial, sans-serif" font-size="10" fill="#666" text-anchor="middle">Furniture...bonded with love</text>
+</svg>
