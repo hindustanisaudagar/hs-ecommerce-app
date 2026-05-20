@@ -1,14 +1,26 @@
 import { WooCommerceClient } from './client'
 import { Category, CategoryQuery } from '@/types'
 
+function decodeHtmlEntities(text: string): string {
+  const entities: Record<string, string> = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#39;': "'",
+    '&nbsp;': ' ',
+  }
+  return text.replace(/&[^;]+;/g, (match) => entities[match] || match)
+}
+
 function mapWooCategoryToInternal(wooCategory: any): Category {
   return {
     id: wooCategory.id.toString(),
-    name: wooCategory.name,
+    name: decodeHtmlEntities(wooCategory.name),
     slug: wooCategory.slug,
-    description: wooCategory.description || '',
+    description: decodeHtmlEntities(wooCategory.description || ''),
     image: wooCategory.image?.src || '',
-    parent_id: wooCategory.parent ? wooCategory.parent.toString() : null,
+    parent_id: wooCategory.parent && wooCategory.parent !== 0 ? wooCategory.parent.toString() : null,
   }
 }
 

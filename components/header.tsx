@@ -31,7 +31,6 @@ interface StaticLink {
 }
 
 const staticLinks: StaticLink[] = [
-  { href: "#sale", label: "Sale" },
   { href: "#bulk-order", label: "Bulk Order & Deals" },
 ]
 

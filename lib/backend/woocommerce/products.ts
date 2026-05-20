@@ -1,16 +1,28 @@
 import { WooCommerceClient } from './client'
 import { Product, ProductQuery, ProductResponse, ProductVariation } from '@/types'
 
+function decodeHtmlEntities(text: string): string {
+  const entities: Record<string, string> = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#39;': "'",
+    '&nbsp;': ' ',
+  }
+  return text.replace(/&[^;]+;/g, (match) => entities[match] || match)
+}
+
 function mapWooProductToInternal(wooProduct: any): Product {
   const metaData = wooProduct.meta_data || []
   const getMeta = (key: string) => metaData.find((m: any) => m.key === key)?.value || ''
   
   return {
     id: wooProduct.id.toString(),
-    name: wooProduct.name,
+    name: decodeHtmlEntities(wooProduct.name),
     slug: wooProduct.slug,
-    description: wooProduct.description || '',
-    short_description: wooProduct.short_description || '',
+    description: decodeHtmlEntities(wooProduct.description || ''),
+    short_description: decodeHtmlEntities(wooProduct.short_description || ''),
     price: parseFloat(wooProduct.price) || 0,
     original_price: wooProduct.regular_price ? parseFloat(wooProduct.regular_price) : null,
     sku: wooProduct.sku || '',
