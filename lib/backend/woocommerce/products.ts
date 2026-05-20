@@ -104,14 +104,16 @@ export function createWooCommerceProducts(client: WooCommerceClient) {
       if (params.category) wooParams.category = params.category
       if (params.slug) wooParams.slug = params.slug
       
-      const products = await client.get('products', wooParams)
+      const response = await client.get('products', wooParams)
+      const products = response.data
+      const total = parseInt(response.headers['x-wp-total'] || '0') || products.length
       
       return {
         products: products.map(mapWooProductToInternal),
-        total: products.length,
+        total,
         page: params.page || 1,
         limit: params.limit || 12,
-        totalPages: Math.ceil(products.length / (params.limit || 12)),
+        totalPages: Math.ceil(total / (params.limit || 12)),
       }
     },
     
@@ -121,7 +123,8 @@ export function createWooCommerceProducts(client: WooCommerceClient) {
     },
     
     async getProductBySlug(slug: string): Promise<Product> {
-      const products = await client.get('products', { slug, per_page: 1 })
+      const response = await client.get('products', { slug, per_page: 1 })
+      const products = response.data
       if (!products || products.length === 0) {
         throw new Error('Product not found')
       }
@@ -175,7 +178,8 @@ export function createWooCommerceProducts(client: WooCommerceClient) {
     },
     
     async getProductVariations(productId: string): Promise<ProductVariation[]> {
-      const variations = await client.get(`products/${productId}/variations`)
+      const response = await client.get(`products/${productId}/variations`)
+      const variations = response.data
       
       return variations.map((v: any) => ({
         id: v.id.toString(),

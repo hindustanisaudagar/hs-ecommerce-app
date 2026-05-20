@@ -38,12 +38,13 @@ export function createWooCommerceOrders(client: WooCommerceClient) {
       
       if (userId) params.customer = parseInt(userId)
       
-      const orders = await client.get('orders', params)
-      return orders.map(mapWooOrderToInternal)
+      const response = await client.get('orders', params)
+      return response.data.map(mapWooOrderToInternal)
     },
     
     async getOrder(id: string, userId?: string): Promise<Order> {
-      const order = await client.get(`orders/${id}`)
+      const response = await client.get(`orders/${id}`)
+      const order = response.data
       
       if (userId && order.customer_id?.toString() !== userId) {
         throw new Error('Order not found')

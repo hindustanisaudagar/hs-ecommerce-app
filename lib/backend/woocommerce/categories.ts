@@ -15,12 +15,13 @@ function mapWooCategoryToInternal(wooCategory: any): Category {
 export function createWooCommerceCategories(client: WooCommerceClient) {
   return {
     async getCategories(params?: CategoryQuery): Promise<Category[]> {
-      const categories = await client.get('products/categories', {
+      const response = await client.get('products/categories', {
         per_page: 100,
         orderby: 'name',
         order: 'asc',
       })
       
+      const categories = response.data
       const mapped = categories.map(mapWooCategoryToInternal)
       
       if (!params?.hierarchical) return mapped

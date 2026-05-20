@@ -33,7 +33,10 @@ export class WooCommerceClient {
       timeout: 15000,
     })
     
-    return response.data
+    return {
+      data: response.data,
+      headers: response.headers,
+    }
   }
   
   async post(endpoint: string, data: any) {
