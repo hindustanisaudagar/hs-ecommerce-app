@@ -118,7 +118,7 @@ export function Header() {
   const handleMouseLeave = () => {
     const timeout = setTimeout(() => {
       setActiveDropdown(null)
-    }, 150)
+    }, 300)
     setDropdownTimeout(timeout)
   }
 
@@ -146,12 +146,12 @@ export function Header() {
           <div className="flex items-center justify-between h-14 md:h-16">
             {/* Logo + Brand Name */}
             <Link href="/" className="flex items-center gap-3 group shrink-0">
-              <div className="relative w-14 h-14 md:w-16 md:h-16 transition-transform duration-300 group-hover:scale-105">
+              <div className="relative w-12 h-12 md:w-14 md:h-14 transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src="/images/logo.jpg"
                   alt="Hindustani Saudagar"
                   fill
-                  className="object-contain mix-blend-multiply"
+                  className="object-contain"
                   priority
                 />
               </div>
@@ -285,12 +285,12 @@ export function Header() {
                   <div className="flex flex-col h-full">
                     <div className="p-6 border-b border-border/50">
                       <div className="flex items-center gap-3">
-                        <div className="relative w-14 h-14">
+                        <div className="relative w-12 h-12">
                           <Image
                             src="/images/logo.jpg"
                             alt="Hindustani Saudagar"
                             fill
-                            className="object-contain mix-blend-multiply"
+                            className="object-contain"
                           />
                         </div>
                         <span className="font-serif text-lg">Hindustani Saudagar</span>
@@ -392,13 +392,13 @@ export function Header() {
 
       {/* Desktop Navigation Bar with Dropdowns */}
       <nav className={cn(
-        "hidden md:block transition-all duration-500 ease-out border-b border-border/20 relative",
+        "hidden md:block transition-all duration-500 ease-out border-b border-border/20",
         isScrolled 
           ? "bg-background/95 backdrop-blur-xl" 
           : "bg-background"
       )}>
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12">
-          <div className="flex items-center justify-center gap-4 xl:gap-6 2xl:gap-8 py-3">
+          <div className="flex items-center justify-center gap-4 xl:gap-6 2xl:gap-8 py-3 relative">
             {loading ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -419,12 +419,6 @@ export function Header() {
                         "relative flex items-center gap-1 text-[13px] font-normal transition-colors tracking-wide whitespace-nowrap group",
                         activeDropdown === category.slug ? "text-ink" : "text-ink/80 hover:text-ink"
                       )}
-                      onClick={(e) => {
-                        if (category.children?.length > 0) {
-                          e.preventDefault()
-                          handleMouseEnter(category.slug)
-                        }
-                      }}
                     >
                       <span className="uppercase">{category.name}</span>
                       {category.children?.length > 0 && (
@@ -439,13 +433,13 @@ export function Header() {
                     {/* Desktop Dropdown */}
                     {category.children?.length > 0 && (
                       <div className={cn(
-                        "absolute top-full left-1/2 -translate-x-1/2 pt-3 transition-all duration-200 ease-out",
+                        "absolute top-full left-1/2 -translate-x-1/2 pt-3 transition-all duration-200 ease-out z-50",
                         activeDropdown === category.slug 
                           ? "opacity-100 visible translate-y-0" 
-                          : "opacity-0 invisible -translate-y-2"
+                          : "opacity-0 invisible -translate-y-2 pointer-events-none"
                       )}>
                         <div className={cn(
-                          "bg-background border border-border/50 shadow-premium-lg rounded-lg overflow-hidden",
+                          "bg-background border border-border/50 shadow-premium-lg rounded-xl overflow-visible",
                           getDropdownWidth(category.children)
                         )}>
                           <div className={cn(
@@ -501,7 +495,7 @@ export function Header() {
         {/* Invisible bridge to prevent dropdown from closing */}
         {activeDropdown && (
           <div 
-            className="absolute top-full left-0 right-0 h-3"
+            className="absolute top-0 left-0 right-0 bottom-0 z-40"
             onMouseEnter={() => {}}
             onMouseLeave={handleMouseLeave}
           />
