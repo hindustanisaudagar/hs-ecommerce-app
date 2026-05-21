@@ -29,6 +29,7 @@ export interface Product {
   product_story_banner?: string
   tradition_banner?: string
   made_in_india_banner?: string
+  local_hands_banner?: string
   meta_title?: string
   meta_description?: string
   category_ids?: string[]

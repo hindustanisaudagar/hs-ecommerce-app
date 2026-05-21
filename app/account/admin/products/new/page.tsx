@@ -88,6 +88,7 @@ export default function AdminNewProductPage() {
   const [productStoryBanner, setProductStoryBanner] = useState('')
   const [traditionBanner, setTraditionBanner] = useState('')
   const [madeInIndiaBanner, setMadeInIndiaBanner] = useState('')
+  const [localHandsBanner, setLocalHandsBanner] = useState('')
   const [features, setFeatures] = useState<ProductFeature[]>([])
   const [variations, setVariations] = useState<VariationFormData[]>([])
   const [showColorPicker, setShowColorPicker] = useState<number | null>(null)
@@ -297,6 +298,7 @@ export default function AdminNewProductPage() {
         product_story_banner: productStoryBanner || undefined,
         tradition_banner: traditionBanner || undefined,
         made_in_india_banner: madeInIndiaBanner || undefined,
+        local_hands_banner: localHandsBanner || undefined,
         tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
         specifications,
         features: features
@@ -855,6 +857,48 @@ export default function AdminNewProductPage() {
                   onChange={(content) => setFormData({ ...formData, made_in_india_section: content })}
                   placeholder="About Indian craftsmanship..."
                 />
+              </div>
+            </div>
+
+            {/* Local Hands Global Elegance Banner */}
+            <div className="space-y-4 pt-6 border-t border-border/50">
+              <h3 className="font-medium text-ink">Local Hands, Global Elegance Banner</h3>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Banner Image</label>
+                <div className="flex items-center gap-4">
+                  {localHandsBanner && (
+                    <img src={localHandsBanner} alt="Local Hands Banner" className="w-40 h-20 rounded-lg object-cover" />
+                  )}
+                  <label className="flex items-center gap-2 px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-xl cursor-pointer hover:border-terracotta/50 text-sm">
+                    <ImageIcon className="w-4 h-4" />
+                    {localHandsBanner ? 'Change Banner' : 'Upload Banner'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          const uploadFormData = new FormData()
+                          uploadFormData.append('file', file)
+                          uploadFormData.append('folder', 'products')
+                          setUploading(true)
+                          fetch('/api/upload', { method: 'POST', body: uploadFormData })
+                            .then(res => res.json())
+                            .then(data => {
+                              if (data.url) setLocalHandsBanner(data.url)
+                            })
+                            .catch(err => console.error('Upload failed:', err))
+                            .finally(() => setUploading(false))
+                        }
+                      }}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                  {localHandsBanner && (
+                    <button type="button" onClick={() => setLocalHandsBanner('')} className="text-red-500 hover:text-red-600 text-sm">Remove</button>
+                  )}
+                </div>
               </div>
             </div>
 

@@ -528,13 +528,13 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       )}
 
       {/* Local Hands Global Elegance Banner */}
-      {product.banner_image && (
+      {product.local_hands_banner && (
         <section className="py-8 bg-warm-beige/40">
           <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16">
             <Reveal>
               <div className="relative w-full overflow-hidden rounded-3xl bg-warm-beige">
                 <Image
-                  src={product.banner_image}
+                  src={product.local_hands_banner}
                   alt="Local Hands, Global Elegance"
                   width={1440}
                   height={480}
