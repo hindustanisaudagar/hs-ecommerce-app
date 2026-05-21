@@ -67,7 +67,17 @@ export function Header() {
     try {
       const res = await fetch('/api/categories?hierarchical=true')
       const data = await res.json()
-      setCategories(data || [])
+      const cats = data || []
+      
+      // Sort categories: those with children (dropdowns) first, then alphabetically
+      const sorted = [...cats].sort((a, b) => {
+        const aHasChildren = a.children?.length > 0 ? 0 : 1
+        const bHasChildren = b.children?.length > 0 ? 0 : 1
+        if (aHasChildren !== bHasChildren) return aHasChildren - bHasChildren
+        return a.name.localeCompare(b.name)
+      })
+      
+      setCategories(sorted)
     } catch (error) {
       console.error('Failed to fetch categories:', error)
     } finally {
@@ -126,12 +136,6 @@ export function Header() {
     setMobileOpenDropdown(mobileOpenDropdown === slug ? null : slug)
   }
 
-  const getDropdownWidth = (children: SubCategory[]) => {
-    if (children.length >= 3) return "w-[800px]"
-    if (children.length === 2) return "w-[500px]"
-    return "w-[280px]"
-  }
-
   return (
     <header className="sticky top-0 z-50">
       {/* Top Thin Black Strip */}
@@ -145,8 +149,8 @@ export function Header() {
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12">
           <div className="flex items-center justify-between h-14 md:h-16">
             {/* Logo + Brand Name */}
-            <Link href="/" className="flex items-center gap-3 group shrink-0">
-              <div className="relative w-12 h-12 md:w-14 md:h-14 transition-transform duration-300 group-hover:scale-105">
+            <Link href="/" className="flex items-center gap-3 group shrink-0 min-w-0">
+              <div className="relative w-10 h-10 md:w-12 md:h-12 flex-shrink-0">
                 <Image
                   src="/images/logo.jpg"
                   alt="Hindustani Saudagar"
@@ -155,7 +159,7 @@ export function Header() {
                   priority
                 />
               </div>
-              <span className="font-serif text-base md:text-lg font-semibold tracking-tight text-ink">
+              <span className="font-serif text-sm md:text-base font-semibold tracking-tight text-ink whitespace-nowrap">
                 Hindustani Saudagar
               </span>
             </Link>
@@ -285,7 +289,7 @@ export function Header() {
                   <div className="flex flex-col h-full">
                     <div className="p-6 border-b border-border/50">
                       <div className="flex items-center gap-3">
-                        <div className="relative w-12 h-12">
+                        <div className="relative w-10 h-10 flex-shrink-0">
                           <Image
                             src="/images/logo.jpg"
                             alt="Hindustani Saudagar"
@@ -293,7 +297,7 @@ export function Header() {
                             className="object-contain"
                           />
                         </div>
-                        <span className="font-serif text-lg">Hindustani Saudagar</span>
+                        <span className="font-serif text-base">Hindustani Saudagar</span>
                       </div>
                     </div>
                     <nav className="flex flex-col p-4 overflow-y-auto">
@@ -398,7 +402,7 @@ export function Header() {
           : "bg-background"
       )}>
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12">
-          <div className="flex items-center justify-center gap-4 xl:gap-6 2xl:gap-8 py-3 relative">
+          <div className="flex items-center justify-center gap-4 xl:gap-6 2xl:gap-8 py-3">
             {loading ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -409,14 +413,14 @@ export function Header() {
                 {categories.map((category) => (
                   <div
                     key={category.id}
-                    className="relative"
+                    className="relative group"
                     onMouseEnter={() => category.children?.length > 0 && handleMouseEnter(category.slug)}
                     onMouseLeave={category.children?.length > 0 ? handleMouseLeave : undefined}
                   >
                     <Link
                       href={`/products?category=${category.slug}`}
                       className={cn(
-                        "relative flex items-center gap-1 text-[13px] font-normal transition-colors tracking-wide whitespace-nowrap group",
+                        "relative flex items-center gap-1 text-[13px] font-normal transition-colors tracking-wide whitespace-nowrap",
                         activeDropdown === category.slug ? "text-ink" : "text-ink/80 hover:text-ink"
                       )}
                     >
@@ -430,7 +434,7 @@ export function Header() {
                       <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-terracotta transition-all duration-300 group-hover:w-full" />
                     </Link>
 
-                    {/* Desktop Dropdown */}
+                    {/* Desktop Dropdown - Full width mega menu */}
                     {category.children?.length > 0 && (
                       <div className={cn(
                         "absolute top-full left-1/2 -translate-x-1/2 pt-3 transition-all duration-200 ease-out z-50",
@@ -438,12 +442,9 @@ export function Header() {
                           ? "opacity-100 visible translate-y-0" 
                           : "opacity-0 invisible -translate-y-2 pointer-events-none"
                       )}>
-                        <div className={cn(
-                          "bg-background border border-border/50 shadow-premium-lg rounded-xl overflow-visible",
-                          getDropdownWidth(category.children)
-                        )}>
+                        <div className="bg-background border border-border/50 shadow-premium-lg rounded-xl p-6 min-w-[600px] max-w-[900px]">
                           <div className={cn(
-                            "grid p-6",
+                            "grid",
                             category.children.length >= 3 ? "grid-cols-3 gap-8" :
                             category.children.length === 2 ? "grid-cols-2 gap-8" : "grid-cols-1 gap-4"
                           )}>
@@ -451,7 +452,7 @@ export function Header() {
                               <div key={child.id} className="min-w-0">
                                 <Link
                                   href={`/products?category=${child.slug}`}
-                                  className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3 block hover:text-terracotta transition-colors whitespace-nowrap"
+                                  className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3 block hover:text-terracotta transition-colors"
                                 >
                                   {child.name}
                                 </Link>
@@ -460,7 +461,7 @@ export function Header() {
                                     <li key={subChild.id}>
                                       <Link
                                         href={`/products?category=${subChild.slug}`}
-                                        className="text-sm text-ink/70 hover:text-terracotta transition-colors block py-1 whitespace-nowrap"
+                                        className="text-sm text-ink/70 hover:text-terracotta transition-colors block py-1"
                                       >
                                         {subChild.name}
                                       </Link>
@@ -495,7 +496,7 @@ export function Header() {
         {/* Invisible bridge to prevent dropdown from closing */}
         {activeDropdown && (
           <div 
-            className="absolute top-0 left-0 right-0 bottom-0 z-40"
+            className="fixed top-0 left-0 right-0 bottom-0 z-40"
             onMouseEnter={() => {}}
             onMouseLeave={handleMouseLeave}
           />
