@@ -225,22 +225,9 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 </div>
               </Reveal>
 
-              {/* About the items */}
-              {product.short_description && (
-                <Reveal delay={200}>
-                  <div className="bg-cream rounded-2xl p-6">
-                    <h2 className="font-serif text-xl text-ink mb-4">About the items</h2>
-                    <div 
-                      className="prose prose-sm max-w-none text-ink/80"
-                      dangerouslySetInnerHTML={{ __html: product.short_description }}
-                    />
-                  </div>
-                </Reveal>
-              )}
-
               {/* Color Variations */}
               {variations.length > 0 && (
-                <Reveal delay={250}>
+                <Reveal delay={200}>
                   <div>
                     <p className="text-sm text-muted-foreground mb-3">Color: <span className="text-ink font-medium">{selectedVariation?.color_name || 'Select'}</span></p>
                     <div className="flex flex-wrap gap-3">
@@ -267,7 +254,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               )}
 
               {/* Quantity */}
-              <Reveal delay={300}>
+              <Reveal delay={250}>
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-muted-foreground">Quantity:</span>
                   <div className="flex items-center border border-border/50 rounded-xl overflow-hidden">
@@ -291,7 +278,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </Reveal>
 
               {/* Add to Cart & Actions */}
-              <Reveal delay={400}>
+              <Reveal delay={300}>
                 <div className="flex gap-4">
                   <button
                     onClick={handleAddToCart}
@@ -318,7 +305,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </Reveal>
 
               {/* Share & Compare */}
-              <Reveal delay={450}>
+              <Reveal delay={350}>
                 <div className="flex items-center gap-4 flex-wrap">
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">Share:</span>
@@ -364,7 +351,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </Reveal>
 
               {/* SKU & Info */}
-              <Reveal delay={500}>
+              <Reveal delay={400}>
                 <div className="pt-6 border-t border-border/50 space-y-3">
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <span className="font-medium text-ink">SKU:</span>
@@ -397,29 +384,59 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       </section>
 
       {/* Product Description Section */}
-      {product.description && (
+      {(product.description || product.banner_image) && (
         <section className="py-16 bg-cream">
-          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16">
-            <Reveal>
-              <div 
-                className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80 prose-a:text-terracotta"
-                dangerouslySetInnerHTML={{ __html: product.description }}
-              />
-            </Reveal>
+          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-8">
+            {product.banner_image && (
+              <Reveal>
+                <div className="relative aspect-[3/1] overflow-hidden rounded-3xl">
+                  <Image
+                    src={product.banner_image}
+                    alt="Product Description Banner"
+                    fill
+                    className="object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </Reveal>
+            )}
+            {product.description && (
+              <Reveal>
+                <div 
+                  className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80 prose-a:text-terracotta"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              </Reveal>
+            )}
           </div>
         </section>
       )}
 
-      {/* Product Story */}
-      {product.product_story && (
+      {/* Product Story Section */}
+      {(product.product_story || product.product_story_banner) && (
         <section className="py-16 bg-warm-beige/40">
-          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16">
-            <Reveal>
-              <div 
-                className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
-                dangerouslySetInnerHTML={{ __html: product.product_story }}
-              />
-            </Reveal>
+          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-8">
+            {product.product_story_banner && (
+              <Reveal>
+                <div className="relative aspect-[3/1] overflow-hidden rounded-3xl">
+                  <Image
+                    src={product.product_story_banner}
+                    alt="Product Story Banner"
+                    fill
+                    className="object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </Reveal>
+            )}
+            {product.product_story && (
+              <Reveal>
+                <div 
+                  className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
+                  dangerouslySetInnerHTML={{ __html: product.product_story }}
+                />
+              </Reveal>
+            )}
           </div>
         </section>
       )}
@@ -458,45 +475,70 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         </section>
       )}
 
-      {/* Made in India Section */}
-      {product.made_in_india_section && (
+      {/* Tradition Section */}
+      {(product.tradition_section || product.tradition_banner) && (
         <section className="py-16 bg-warm-beige/40">
-          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16">
-            <Reveal>
-              <div 
-                className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
-                dangerouslySetInnerHTML={{ __html: product.made_in_india_section }}
-              />
-            </Reveal>
+          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-8">
+            {product.tradition_banner && (
+              <Reveal>
+                <div className="relative aspect-[3/1] overflow-hidden rounded-3xl">
+                  <Image
+                    src={product.tradition_banner}
+                    alt="Tradition Banner"
+                    fill
+                    className="object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </Reveal>
+            )}
+            {product.tradition_section && (
+              <Reveal>
+                <div 
+                  className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
+                  dangerouslySetInnerHTML={{ __html: product.tradition_section }}
+                />
+              </Reveal>
+            )}
           </div>
         </section>
       )}
 
-      {/* Banner Image */}
-      {product.banner_image && (
-        <section className="py-8">
-          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16">
-            <Reveal>
-              <div className="relative aspect-[3/1] overflow-hidden rounded-3xl">
-                <Image
-                  src={product.banner_image}
-                  alt="Banner"
-                  fill
-                  className="object-cover"
-                  loading="lazy"
+      {/* Made in India Section */}
+      {(product.made_in_india_section || product.made_in_india_banner) && (
+        <section className="py-16 bg-cream">
+          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-8">
+            {product.made_in_india_banner && (
+              <Reveal>
+                <div className="relative aspect-[3/1] overflow-hidden rounded-3xl">
+                  <Image
+                    src={product.made_in_india_banner}
+                    alt="Made in India Banner"
+                    fill
+                    className="object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </Reveal>
+            )}
+            {product.made_in_india_section && (
+              <Reveal>
+                <div 
+                  className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
+                  dangerouslySetInnerHTML={{ __html: product.made_in_india_section }}
                 />
-              </div>
-            </Reveal>
+              </Reveal>
+            )}
           </div>
         </section>
       )}
 
       {/* Handmade Disclaimer */}
       {product.handmade_disclaimer && (
-        <section className="py-12 bg-cream">
+        <section className="py-12 bg-warm-beige/40">
           <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16">
             <Reveal>
-              <div className="bg-warm-beige/30 rounded-2xl p-8 text-center">
+              <div className="bg-cream rounded-2xl p-8 text-center">
                 <p className="text-sm text-ink/70 italic">{product.handmade_disclaimer}</p>
               </div>
             </Reveal>

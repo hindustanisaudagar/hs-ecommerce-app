@@ -165,6 +165,9 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
   const [images, setImages] = useState<string[]>([])
   const [sectionImages, setSectionImages] = useState<string[]>([])
   const [bannerImage, setBannerImage] = useState('')
+  const [productStoryBanner, setProductStoryBanner] = useState('')
+  const [traditionBanner, setTraditionBanner] = useState('')
+  const [madeInIndiaBanner, setMadeInIndiaBanner] = useState('')
   const [features, setFeatures] = useState<ProductFeature[]>([])
   const [variations, setVariations] = useState<VariationFormData[]>([])
   const [showColorPicker, setShowColorPicker] = useState<number | null>(null)
@@ -224,6 +227,9 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
         setImages(data.images || [])
         setSectionImages(data.section_images || [])
         setBannerImage(data.banner_image || '')
+        setProductStoryBanner(data.product_story_banner || '')
+        setTraditionBanner(data.tradition_banner || '')
+        setMadeInIndiaBanner(data.made_in_india_banner || '')
         setFeatures(data.features || [])
         
         if (data.has_variations) {
@@ -435,6 +441,9 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
         images: images.length > 0 ? images : undefined,
         section_images: sectionImages.length > 0 ? sectionImages : undefined,
         banner_image: bannerImage || undefined,
+        product_story_banner: productStoryBanner || undefined,
+        tradition_banner: traditionBanner || undefined,
+        made_in_india_banner: madeInIndiaBanner || undefined,
         tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
         specifications,
         features: features
@@ -743,32 +752,208 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
         <div className="bg-cream rounded-2xl shadow-premium overflow-hidden">
           <SectionHeader icon={BookOpen} title="Rich Content Sections" section="richContent" isExpanded={expandedSections["richContent"]} onToggle={toggleSection} />
           <SectionContent isVisible={expandedSections["richContent"]}>
-            <div>
-              <label className="block text-sm text-muted-foreground mb-2">Product Story</label>
-              <p className="text-xs text-muted-foreground mb-2">"Tradition in Form, Art in Soul" section</p>
-              <RichTextEditor
-                content={formData.product_story}
-                onChange={(content) => setFormData({ ...formData, product_story: content })}
-                placeholder="Tell the story behind this product..."
-              />
+            {/* Product Description Section */}
+            <div className="space-y-4 pb-6 border-b border-border/50">
+              <h3 className="font-medium text-ink">Product Description</h3>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Banner Image</label>
+                <div className="flex items-center gap-4">
+                  {bannerImage && (
+                    <img src={bannerImage} alt="Product Description Banner" className="w-40 h-20 rounded-lg object-cover" />
+                  )}
+                  <label className="flex items-center gap-2 px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-xl cursor-pointer hover:border-terracotta/50 text-sm">
+                    <ImageIcon className="w-4 h-4" />
+                    {bannerImage ? 'Change Banner' : 'Upload Banner'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          const uploadFormData = new FormData()
+                          uploadFormData.append('file', file)
+                          uploadFormData.append('folder', 'products')
+                          setUploading(true)
+                          fetch('/api/upload', { method: 'POST', body: uploadFormData })
+                            .then(res => res.json())
+                            .then(data => {
+                              if (data.url) setBannerImage(data.url)
+                            })
+                            .catch(err => console.error('Upload failed:', err))
+                            .finally(() => setUploading(false))
+                        }
+                      }}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                  {bannerImage && (
+                    <button type="button" onClick={() => setBannerImage('')} className="text-red-500 hover:text-red-600 text-sm">Remove</button>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Description Content</label>
+                <RichTextEditor
+                  content={formData.description}
+                  onChange={(content) => setFormData({ ...formData, description: content })}
+                  placeholder="Detailed product description..."
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm text-muted-foreground mb-2">Tradition Section</label>
-              <RichTextEditor
-                content={formData.tradition_section}
-                onChange={(content) => setFormData({ ...formData, tradition_section: content })}
-                placeholder="About the tradition and craftsmanship..."
-              />
+
+            {/* Product Story Section */}
+            <div className="space-y-4 pt-6 pb-6 border-b border-border/50">
+              <h3 className="font-medium text-ink">Product Story <span className="text-xs text-muted-foreground font-normal">("Tradition in Form, Art in Soul")</span></h3>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Banner Image</label>
+                <div className="flex items-center gap-4">
+                  {productStoryBanner && (
+                    <img src={productStoryBanner} alt="Product Story Banner" className="w-40 h-20 rounded-lg object-cover" />
+                  )}
+                  <label className="flex items-center gap-2 px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-xl cursor-pointer hover:border-terracotta/50 text-sm">
+                    <ImageIcon className="w-4 h-4" />
+                    {productStoryBanner ? 'Change Banner' : 'Upload Banner'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          const uploadFormData = new FormData()
+                          uploadFormData.append('file', file)
+                          uploadFormData.append('folder', 'products')
+                          setUploading(true)
+                          fetch('/api/upload', { method: 'POST', body: uploadFormData })
+                            .then(res => res.json())
+                            .then(data => {
+                              if (data.url) setProductStoryBanner(data.url)
+                            })
+                            .catch(err => console.error('Upload failed:', err))
+                            .finally(() => setUploading(false))
+                        }
+                      }}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                  {productStoryBanner && (
+                    <button type="button" onClick={() => setProductStoryBanner('')} className="text-red-500 hover:text-red-600 text-sm">Remove</button>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Story Content</label>
+                <RichTextEditor
+                  content={formData.product_story}
+                  onChange={(content) => setFormData({ ...formData, product_story: content })}
+                  placeholder="Tell the story behind this product..."
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm text-muted-foreground mb-2">Made in India Section</label>
-              <RichTextEditor
-                content={formData.made_in_india_section}
-                onChange={(content) => setFormData({ ...formData, made_in_india_section: content })}
-                placeholder="About Indian craftsmanship..."
-              />
+
+            {/* Tradition Section */}
+            <div className="space-y-4 pt-6 pb-6 border-b border-border/50">
+              <h3 className="font-medium text-ink">Tradition & Craftsmanship</h3>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Banner Image</label>
+                <div className="flex items-center gap-4">
+                  {traditionBanner && (
+                    <img src={traditionBanner} alt="Tradition Banner" className="w-40 h-20 rounded-lg object-cover" />
+                  )}
+                  <label className="flex items-center gap-2 px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-xl cursor-pointer hover:border-terracotta/50 text-sm">
+                    <ImageIcon className="w-4 h-4" />
+                    {traditionBanner ? 'Change Banner' : 'Upload Banner'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          const uploadFormData = new FormData()
+                          uploadFormData.append('file', file)
+                          uploadFormData.append('folder', 'products')
+                          setUploading(true)
+                          fetch('/api/upload', { method: 'POST', body: uploadFormData })
+                            .then(res => res.json())
+                            .then(data => {
+                              if (data.url) setTraditionBanner(data.url)
+                            })
+                            .catch(err => console.error('Upload failed:', err))
+                            .finally(() => setUploading(false))
+                        }
+                      }}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                  {traditionBanner && (
+                    <button type="button" onClick={() => setTraditionBanner('')} className="text-red-500 hover:text-red-600 text-sm">Remove</button>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Tradition Content</label>
+                <RichTextEditor
+                  content={formData.tradition_section}
+                  onChange={(content) => setFormData({ ...formData, tradition_section: content })}
+                  placeholder="About the tradition and craftsmanship..."
+                />
+              </div>
             </div>
-            <div>
+
+            {/* Made in India Section */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-medium text-ink">Made in India</h3>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Banner Image</label>
+                <div className="flex items-center gap-4">
+                  {madeInIndiaBanner && (
+                    <img src={madeInIndiaBanner} alt="Made in India Banner" className="w-40 h-20 rounded-lg object-cover" />
+                  )}
+                  <label className="flex items-center gap-2 px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-xl cursor-pointer hover:border-terracotta/50 text-sm">
+                    <ImageIcon className="w-4 h-4" />
+                    {madeInIndiaBanner ? 'Change Banner' : 'Upload Banner'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          const uploadFormData = new FormData()
+                          uploadFormData.append('file', file)
+                          uploadFormData.append('folder', 'products')
+                          setUploading(true)
+                          fetch('/api/upload', { method: 'POST', body: uploadFormData })
+                            .then(res => res.json())
+                            .then(data => {
+                              if (data.url) setMadeInIndiaBanner(data.url)
+                            })
+                            .catch(err => console.error('Upload failed:', err))
+                            .finally(() => setUploading(false))
+                        }
+                      }}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                  {madeInIndiaBanner && (
+                    <button type="button" onClick={() => setMadeInIndiaBanner('')} className="text-red-500 hover:text-red-600 text-sm">Remove</button>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Made in India Content</label>
+                <RichTextEditor
+                  content={formData.made_in_india_section}
+                  onChange={(content) => setFormData({ ...formData, made_in_india_section: content })}
+                  placeholder="About Indian craftsmanship..."
+                />
+              </div>
+            </div>
+
+            {/* Handmade Disclaimer */}
+            <div className="pt-6 border-t border-border/50">
               <label className="block text-sm text-muted-foreground mb-2">Handmade Disclaimer</label>
               <textarea
                 name="handmade_disclaimer"
