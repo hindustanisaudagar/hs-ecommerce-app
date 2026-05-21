@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Package, ShoppingCart, FolderOpen, LayoutDashboard, ArrowLeft, Shield, Settings, Home } from 'lucide-react'
+import { Package, ShoppingCart, FolderOpen, LayoutDashboard, ArrowLeft, Shield, Settings, Home, Image } from 'lucide-react'
 
 const adminNav = [
   { href: '/account/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/account/admin/landing-page', label: 'Landing Page', icon: Image },
   { href: '/account/admin/products', label: 'Products', icon: Package },
   { href: '/account/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/account/admin/categories', label: 'Categories', icon: FolderOpen },
