@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { Save, Upload, Loader2, Layout, Image as ImageIcon, Type, Settings } from 'lucide-react'
+import { Save, Upload, Loader2, Layout, Image as ImageIcon, Type, Settings, Plus } from 'lucide-react'
 
 const sections = [
   { id: 'hero', label: 'Hero', icon: Layout },
@@ -72,12 +72,14 @@ export default function AdminLandingPage() {
   const handleImageUpload = async (field: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file')
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      alert('Please select an image or video file')
       return
     }
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Image size should be less than 2MB')
+    const isVideo = file.type.startsWith('video/')
+    const maxSize = isVideo ? 20 * 1024 * 1024 : 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      alert(`File size should be less than ${isVideo ? '20MB' : '5MB'}`)
       return
     }
     setUploading(true)
@@ -97,15 +99,20 @@ export default function AdminLandingPage() {
         if (field === 'images') {
           const images = [...(section.images || [])]
           const index = parseInt(e.target.dataset.index || '0')
-          images[index] = { src: data.url, alt: images[index]?.alt || 'Image' }
+          images[index] = { src: data.url, alt: images[index]?.alt || 'Image', type: data.resource_type || 'image' }
           return { ...prev, [activeSection]: { ...section, images } }
         } else if (field === 'logos') {
           const items = [...(section.items || [])]
           const index = parseInt(e.target.dataset.index || '0')
           items[index] = { ...items[index], logo: data.url }
           return { ...prev, [activeSection]: { ...section, items } }
+        } else if (field === 'slides') {
+          const slides = [...(section.slides || [])]
+          const index = parseInt(e.target.dataset.index || '0')
+          slides[index] = { ...slides[index], image: data.url, type: data.resource_type || 'image' }
+          return { ...prev, [activeSection]: { ...section, slides } }
         } else {
-          return { ...prev, [activeSection]: { ...section, [field]: data.url } }
+          return { ...prev, [activeSection]: { ...section, [field]: data.url, media_type: data.resource_type || 'image' } }
         }
       })
     } catch (error: any) {
@@ -194,19 +201,100 @@ export default function AdminLandingPage() {
 
   const renderHeroSection = () => {
     const data = content.hero || {}
+    const slides = data.slides || [data]
     return (
       <div className="space-y-6">
-        <h3 className="font-medium text-ink text-lg">Hero Section</h3>
-        {renderImageUpload('image', 'Hero Image', 'Recommended: 1920x1080px, Max 2MB')}
-        <div className="grid md:grid-cols-3 gap-4">
-          {renderTextField('title_hindi', 'Title Hindi (Part 1)')}
-          {renderTextField('title_hindi_highlight', 'Title Hindi (Highlight)')}
-          {renderTextField('title_hindi_suffix', 'Title Hindi (Suffix)')}
-        </div>
-        {renderTextField('subtitle', 'Subtitle (English)')}
-        {renderTextField('description', 'Description', 'text', 3)}
-        {renderGridFields([{ field: 'cta_text', label: 'CTA Button Text' }, { field: 'cta_link', label: 'CTA Button Link' }])}
-        {renderGridFields([{ field: 'secondary_text', label: 'Secondary Link Text' }, { field: 'secondary_link', label: 'Secondary Link URL' }])}
+        <h3 className="font-medium text-ink text-lg">Hero Section (Slider)</h3>
+        <p className="text-sm text-muted-foreground">Add multiple slides for the hero carousel. Each slide has its own image/video and text.</p>
+        
+        {slides.map((slide: any, index: number) => (
+          <div key={index} className="p-6 bg-warm-beige/30 rounded-xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium text-ink">Slide {index + 1}</h4>
+              {slides.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newSlides = slides.filter((_: any, i: number) => i !== index)
+                    updateField('slides', newSlides)
+                  }}
+                  className="text-red-500 hover:text-red-600 text-sm"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm text-muted-foreground mb-2">Image/Video</label>
+              <div className="flex items-start gap-4">
+                {slide.image && (
+                  <div className="relative w-32 h-24 rounded-lg overflow-hidden bg-warm-beige">
+                    {slide.type === 'video' ? (
+                      <video src={slide.image} className="w-full h-full object-cover" muted loop />
+                    ) : (
+                      <Image src={slide.image} alt="" fill className="object-cover" />
+                    )}
+                  </div>
+                )}
+                <div>
+                  <input type="file" accept="image/*,video/*" onChange={(e) => handleImageUpload('slides', e)} disabled={uploading && uploadField === 'slides'} className="hidden" id={`slide-${index}`} data-index={index} />
+                  <button type="button" onClick={() => document.getElementById(`slide-${index}`)?.click()} disabled={uploading && uploadField === 'slides'} className="flex items-center gap-2 px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-sm hover:bg-warm-beige transition-colors disabled:opacity-50">
+                    {uploading && uploadField === 'slides' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    {uploading && uploadField === 'slides' ? 'Uploading...' : 'Upload Image/Video'}
+                  </button>
+                  <p className="text-xs text-muted-foreground mt-1">Recommended: 1920x1080px, Max 5MB (images) or 20MB (videos)</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Title Hindi (Part 1)</label>
+                <input type="text" value={slide.title_hindi || ''} onChange={(e) => { const newSlides = [...slides]; newSlides[index] = { ...newSlides[index], title_hindi: e.target.value }; updateField('slides', newSlides) }} className="w-full px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50" />
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Title Hindi (Highlight)</label>
+                <input type="text" value={slide.title_hindi_highlight || ''} onChange={(e) => { const newSlides = [...slides]; newSlides[index] = { ...newSlides[index], title_hindi_highlight: e.target.value }; updateField('slides', newSlides) }} className="w-full px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50" />
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Title Hindi (Suffix)</label>
+                <input type="text" value={slide.title_hindi_suffix || ''} onChange={(e) => { const newSlides = [...slides]; newSlides[index] = { ...newSlides[index], title_hindi_suffix: e.target.value }; updateField('slides', newSlides) }} className="w-full px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm text-muted-foreground mb-2">Subtitle (English)</label>
+              <input type="text" value={slide.subtitle || ''} onChange={(e) => { const newSlides = [...slides]; newSlides[index] = { ...newSlides[index], subtitle: e.target.value }; updateField('slides', newSlides) }} className="w-full px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50" />
+            </div>
+            <div>
+              <label className="block text-sm text-muted-foreground mb-2">Description</label>
+              <textarea rows={2} value={slide.description || ''} onChange={(e) => { const newSlides = [...slides]; newSlides[index] = { ...newSlides[index], description: e.target.value }; updateField('slides', newSlides) }} className="w-full px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50" />
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">CTA Button Text</label>
+                <input type="text" value={slide.cta_text || ''} onChange={(e) => { const newSlides = [...slides]; newSlides[index] = { ...newSlides[index], cta_text: e.target.value }; updateField('slides', newSlides) }} className="w-full px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50" />
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">CTA Button Link</label>
+                <input type="text" value={slide.cta_link || ''} onChange={(e) => { const newSlides = [...slides]; newSlides[index] = { ...newSlides[index], cta_link: e.target.value }; updateField('slides', newSlides) }} className="w-full px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50" />
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={() => {
+            const newSlides = [...slides, {}]
+            updateField('slides', newSlides)
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-ink text-cream rounded-lg text-sm hover:bg-ink/90 transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Add Slide
+        </button>
+
         <div>
           <label className="block text-sm text-muted-foreground mb-2">Stats (3 items)</label>
           <div className="space-y-3">

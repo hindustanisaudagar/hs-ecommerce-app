@@ -34,6 +34,28 @@ export async function uploadImage(file: Buffer, folder: string = 'products') {
   })
 }
 
+export async function uploadVideo(file: Buffer, folder: string = 'products') {
+  ensureConfigured()
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: `hindustani-saudagar/${folder}`,
+        resource_type: 'video',
+        transformation: [
+          { quality: 'auto:good' },
+          { fetch_format: 'auto' },
+        ],
+      },
+      (error, result) => {
+        if (error) reject(error)
+        else resolve(result)
+      }
+    )
+
+    uploadStream.end(file)
+  })
+}
+
 export async function deleteImage(publicId: string) {
   ensureConfigured()
   return cloudinary.uploader.destroy(publicId)

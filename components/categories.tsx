@@ -32,8 +32,8 @@ export function Categories() {
     try {
       setLoading(true)
       
-      // Fetch categories
-      const catRes = await fetch('/api/categories?limit=8')
+      // Fetch categories with hierarchical data
+      const catRes = await fetch('/api/categories?hierarchical=true&limit=8')
       const catData = await catRes.json()
       setCategories(catData || [])
       
@@ -94,12 +94,18 @@ export function Categories() {
             <Reveal key={category.id} delay={index * 80}>
               <Link href={`/products?category=${category.slug}`} className="group block">
                 <div className="relative aspect-[4/5] overflow-hidden rounded-2xl md:rounded-3xl shadow-premium transition-all duration-500 group-hover:shadow-premium-lg">
-                  <Image
-                    src={category.image || '/images/placeholder-category.jpg'}
-                    alt={category.name}
-                    fill
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                  />
+                  {category.image ? (
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      fill
+                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-warm-beige to-cream flex items-center justify-center">
+                      <span className="text-4xl font-serif text-muted-foreground/30">{category.name.charAt(0)}</span>
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
                   
                   <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6">

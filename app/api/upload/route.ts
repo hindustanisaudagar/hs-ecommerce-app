@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { uploadImage } from '@/lib/cloudinary'
+import { uploadImage, uploadVideo } from '@/lib/cloudinary'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,13 +33,17 @@ export async function POST(request: Request) {
     }
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      return NextResponse.json({ error: 'Only image files are allowed' }, { status: 400 })
+    const isImage = file.type.startsWith('image/')
+    const isVideo = file.type.startsWith('video/')
+
+    if (!isImage && !isVideo) {
+      return NextResponse.json({ error: 'Only image and video files are allowed' }, { status: 400 })
     }
 
-    // Validate file size (2MB max)
-    if (file.size > 2 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File size must be less than 2MB' }, { status: 400 })
+    // Validate file size (5MB for images, 20MB for videos)
+    const maxSize = isVideo ? 20 * 1024 * 1024 : 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      return NextResponse.json({ error: `File size must be less than ${isVideo ? '20MB' : '5MB'}` }, { status: 400 })
     }
 
     // Convert file to buffer
@@ -47,13 +51,19 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(bytes)
 
     // Upload to Cloudinary
-    const result = await uploadImage(buffer, folder)
+    let result
+    if (isVideo) {
+      result = await uploadVideo(buffer, folder)
+    } else {
+      result = await uploadImage(buffer, folder)
+    }
 
     return NextResponse.json({
       url: result.secure_url,
       public_id: result.public_id,
       width: result.width,
       height: result.height,
+      resource_type: result.resource_type,
     })
   } catch (error: any) {
     console.error('Upload error:', error)
