@@ -102,66 +102,6 @@ function getChildCategoryIds(parentId: string, categories: any[]): string[] {
   }
   return childIds
 }
-      // If not found by slug, assume it's already an ID
-    }
-    
-    const backend = await createBackend()
-
-    const result = await backend.getProducts({
-      category: category || undefined,
-      categoryIds: categoryIds ? categoryIds.split(',') : undefined,
-      search: search || undefined,
-      slug: slug || undefined,
-      tag: tag || undefined,
-      minPrice: minPrice ? parseFloat(minPrice) : undefined,
-      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
-      sortBy,
-      sortOrder: sortOrder as 'asc' | 'desc',
-      page,
-      limit,
-    })
-
-    console.log(`📦 GET /api/products - Returning ${result.products.length} products`)
-
-    return NextResponse.json(result)
-  } catch (error: any) {
-    console.error(' GET /api/products error:', error)
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    )
-  }
-}
-    }
-    
-    const backend = await createBackend()
-
-    const result = await backend.getProducts({
-      category: category || undefined,
-      categoryIds: categoryIds ? categoryIds.split(',') : undefined,
-      search: search || undefined,
-      slug: slug || undefined,
-      tag: tag || undefined,
-      minPrice: minPrice ? parseFloat(minPrice) : undefined,
-      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
-      sortBy,
-      sortOrder: sortOrder as 'asc' | 'desc',
-      page,
-      limit,
-    })
-
-    console.log(` GET /api/products - Returning ${result.products.length} products`)
-
-    return NextResponse.json(result)
-  } catch (error: any) {
-    console.error('❌ GET /api/products error:', error)
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    )
-  }
-}
-}
 
 export async function POST(request: Request) {
   try {
