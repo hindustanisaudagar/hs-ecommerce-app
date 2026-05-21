@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -9,22 +9,19 @@ import { Footer } from '@/components/footer'
 import { Reveal } from '@/components/reveal'
 import { Product } from '@/types'
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState(searchParams.get('search') || '')
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '')
-  const [sortBy, setSortBy] = useState(searchParams.get('sortBy') || 'created_at')
-  const [sortOrder, setSortOrder] = useState(searchParams.get('sortOrder') || 'desc')
-  const [page, setPage] = useState(parseInt(searchParams.get('page') || '1'))
+  const [search, setSearch] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [sortBy, setSortBy] = useState('created_at')
+  const [sortOrder, setSortOrder] = useState('desc')
+  const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [categories, setCategories] = useState<any[]>([])
-
-  useEffect(() => {
-    fetchCategories()
-  }, [])
+  const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
     const urlSearch = searchParams.get('search') || ''
@@ -38,13 +35,20 @@ export default function ProductsPage() {
     setSortBy(urlSortBy)
     setSortOrder(urlSortOrder)
     setPage(urlPage)
+    setInitialized(true)
   }, [searchParams])
 
   useEffect(() => {
+    if (!initialized) return
     fetchProducts()
-  }, [search, selectedCategory, sortBy, sortOrder, page])
+  }, [search, selectedCategory, sortBy, sortOrder, page, initialized])
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
 
   const updateUrl = (params: Record<string, string>) => {
+    if (typeof window === 'undefined') return
     const current = new URLSearchParams(window.location.search)
     Object.entries(params).forEach(([key, value]) => {
       if (value) current.set(key, value)
@@ -258,5 +262,20 @@ export default function ProductsPage() {
 
       <Footer />
     </main>
+  )
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-terracotta border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading products...</p>
+        </div>
+      </div>
+    }>
+      <ProductsPageContent />
+    </Suspense>
   )
 }
