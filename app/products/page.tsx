@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Header } from '@/components/header'
@@ -9,13 +10,15 @@ import { Reveal } from '@/components/reveal'
 import { Product } from '@/types'
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('')
-  const [sortBy, setSortBy] = useState('created_at')
-  const [sortOrder, setSortOrder] = useState('desc')
-  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState(searchParams.get('search') || '')
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '')
+  const [sortBy, setSortBy] = useState(searchParams.get('sortBy') || 'created_at')
+  const [sortOrder, setSortOrder] = useState(searchParams.get('sortOrder') || 'desc')
+  const [page, setPage] = useState(parseInt(searchParams.get('page') || '1'))
   const [totalPages, setTotalPages] = useState(1)
   const [categories, setCategories] = useState<any[]>([])
 
@@ -24,8 +27,32 @@ export default function ProductsPage() {
   }, [])
 
   useEffect(() => {
+    const urlSearch = searchParams.get('search') || ''
+    const urlCategory = searchParams.get('category') || ''
+    const urlSortBy = searchParams.get('sortBy') || 'created_at'
+    const urlSortOrder = searchParams.get('sortOrder') || 'desc'
+    const urlPage = parseInt(searchParams.get('page') || '1')
+
+    setSearch(urlSearch)
+    setSelectedCategory(urlCategory)
+    setSortBy(urlSortBy)
+    setSortOrder(urlSortOrder)
+    setPage(urlPage)
+  }, [searchParams])
+
+  useEffect(() => {
     fetchProducts()
   }, [search, selectedCategory, sortBy, sortOrder, page])
+
+  const updateUrl = (params: Record<string, string>) => {
+    const current = new URLSearchParams(window.location.search)
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) current.set(key, value)
+      else current.delete(key)
+    })
+    const newUrl = `${window.location.pathname}?${current.toString()}`
+    router.push(newUrl, { scroll: false })
+  }
 
   const fetchCategories = async () => {
     try {
@@ -61,6 +88,31 @@ export default function ProductsPage() {
     }
   }
 
+  const handleSearchChange = (value: string) => {
+    setSearch(value)
+    setPage(1)
+    updateUrl({ search: value, page: '1' })
+  }
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value)
+    setPage(1)
+    updateUrl({ category: value, page: '1' })
+  }
+
+  const handleSortChange = (value: string) => {
+    const [newSortBy, newSortOrder] = value.split('-')
+    setSortBy(newSortBy)
+    setSortOrder(newSortOrder)
+    setPage(1)
+    updateUrl({ sortBy: newSortBy, sortOrder: newSortOrder, page: '1' })
+  }
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage)
+    updateUrl({ page: newPage.toString() })
+  }
+
   return (
     <main className="min-h-screen">
       <Header />
@@ -84,22 +136,16 @@ export default function ProductsPage() {
                 type="text"
                 placeholder="Search products..."
                 value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value)
-                  setPage(1)
-                }}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full px-4 py-3 bg-cream border border-border/50 rounded-xl text-ink placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-terracotta/50"
               />
             </div>
 
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value)
-                setPage(1)
-              }}
-              className="px-4 py-3 bg-cream border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
-            >
+              <select
+                value={selectedCategory}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                className="px-4 py-3 bg-cream border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
+              >
               <option value="">All Categories</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
@@ -108,16 +154,11 @@ export default function ProductsPage() {
               ))}
             </select>
 
-            <select
-              value={`${sortBy}-${sortOrder}`}
-              onChange={(e) => {
-                const [newSortBy, newSortOrder] = e.target.value.split('-')
-                setSortBy(newSortBy)
-                setSortOrder(newSortOrder)
-                setPage(1)
-              }}
-              className="px-4 py-3 bg-cream border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
-            >
+              <select
+                value={`${sortBy}-${sortOrder}`}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="px-4 py-3 bg-cream border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
+              >
               <option value="created_at-desc">Newest First</option>
               <option value="created_at-asc">Oldest First</option>
               <option value="price-asc">Price: Low to High</option>
@@ -192,7 +233,7 @@ export default function ProductsPage() {
               {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-4 mt-12">
                   <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    onClick={() => handlePageChange(Math.max(1, page - 1))}
                     disabled={page === 1}
                     className="px-6 py-3 bg-cream border border-border/50 rounded-xl text-ink disabled:opacity-50 disabled:cursor-not-allowed hover:bg-warm-beige transition-colors"
                   >
@@ -202,7 +243,7 @@ export default function ProductsPage() {
                     Page {page} of {totalPages}
                   </span>
                   <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
                     disabled={page === totalPages}
                     className="px-6 py-3 bg-cream border border-border/50 rounded-xl text-ink disabled:opacity-50 disabled:cursor-not-allowed hover:bg-warm-beige transition-colors"
                   >
