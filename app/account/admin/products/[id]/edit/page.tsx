@@ -298,39 +298,40 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
       const file = e.target.files[0]
       const uploadFormData = new FormData()
       uploadFormData.append('file', file)
-      uploadFormData.append('upload_preset', 'hindustani-saudagar')
-      uploadFormData.append('cloud_name', process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '')
+      uploadFormData.append('folder', 'products')
 
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        {
-          method: 'POST',
-          body: uploadFormData,
-        }
-      )
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Upload failed')
+      }
 
       const data = await res.json()
 
-      if (data.secure_url) {
+      if (data.url) {
         if (type === 'product') {
-          setImages([...images, data.secure_url])
+          setImages([...images, data.url])
         } else if (type === 'section') {
-          setSectionImages([...sectionImages, data.secure_url])
+          setSectionImages([...sectionImages, data.url])
         } else if (type === 'banner') {
-          setBannerImage(data.secure_url)
+          setBannerImage(data.url)
         } else if (type === 'feature' && index !== undefined) {
           const newFeatures = [...features]
-          newFeatures[index].icon_url = data.secure_url
+          newFeatures[index].icon_url = data.url
           setFeatures(newFeatures)
         } else if (type === 'variation' && index !== undefined) {
           const newVariations = [...variations]
-          newVariations[index].image_url = data.secure_url
+          newVariations[index].image_url = data.url
           setVariations(newVariations)
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to upload image:', error)
-      alert('Failed to upload image')
+      alert(error.message || 'Failed to upload image')
     } finally {
       setUploading(false)
     }
