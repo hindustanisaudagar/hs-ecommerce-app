@@ -21,19 +21,87 @@ export async function GET(request: Request) {
 
     console.log('🔍 GET /api/products - Fetching products')
     
-    // If category param is provided, try to resolve it to a category ID
+    // If category param is provided, resolve it and include all child categories
     if (category) {
       const supabase = await createClient()
+      
       // First try to find by slug
       const { data: categoryBySlug } = await supabase
         .from('categories')
-        .select('id')
+        .select('id, slug')
         .eq('slug', category)
         .single()
       
       if (categoryBySlug) {
         category = categoryBySlug.id
+        
+        // Get all child category IDs recursively
+        const { data: allCategories } = await supabase
+          .from('categories')
+          .select('id, parent_id')
+        
+        if (allCategories) {
+          const childIds = getChildCategoryIds(category, allCategories)
+          if (childIds.length > 0) {
+            // Use categoryIds instead of category to include children
+            const backend = await createBackend()
+            const result = await backend.getProducts({
+              categoryIds: [category, ...childIds],
+              search: search || undefined,
+              slug: slug || undefined,
+              tag: tag || undefined,
+              minPrice: minPrice ? parseFloat(minPrice) : undefined,
+              maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+              sortBy,
+              sortOrder: sortOrder as 'asc' | 'desc',
+              page,
+              limit,
+            })
+            console.log(`📦 GET /api/products - Returning ${result.products.length} products`)
+            return NextResponse.json(result)
+          }
+        }
       }
+    }
+    
+    const backend = await createBackend()
+
+    const result = await backend.getProducts({
+      category: category || undefined,
+      categoryIds: categoryIds ? categoryIds.split(',') : undefined,
+      search: search || undefined,
+      slug: slug || undefined,
+      tag: tag || undefined,
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      sortBy,
+      sortOrder: sortOrder as 'asc' | 'desc',
+      page,
+      limit,
+    })
+
+    console.log(`📦 GET /api/products - Returning ${result.products.length} products`)
+
+    return NextResponse.json(result)
+  } catch (error: any) {
+    console.error('❌ GET /api/products error:', error)
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    )
+  }
+}
+
+function getChildCategoryIds(parentId: string, categories: any[]): string[] {
+  const childIds: string[] = []
+  for (const cat of categories) {
+    if (cat.parent_id === parentId) {
+      childIds.push(cat.id)
+      childIds.push(...getChildCategoryIds(cat.id, categories))
+    }
+  }
+  return childIds
+}
       // If not found by slug, assume it's already an ID
     }
     
