@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
 
-    console.log('🔍 GET /api/products - Fetching products')
+    console.log(' GET /api/products - Fetching products')
     
     // If category param is provided, resolve it and include all child categories
     if (category) {
@@ -33,34 +33,36 @@ export async function GET(request: Request) {
         .single()
       
       if (categoryBySlug) {
-        category = categoryBySlug.id
+        const categoryId = categoryBySlug.id
         
         // Get all child category IDs recursively
         const { data: allCategories } = await supabase
           .from('categories')
           .select('id, parent_id')
         
-        if (allCategories) {
-          const childIds = getChildCategoryIds(category, allCategories)
-          if (childIds.length > 0) {
-            // Use categoryIds instead of category to include children
-            const backend = await createBackend()
-            const result = await backend.getProducts({
-              categoryIds: [category, ...childIds],
-              search: search || undefined,
-              slug: slug || undefined,
-              tag: tag || undefined,
-              minPrice: minPrice ? parseFloat(minPrice) : undefined,
-              maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
-              sortBy,
-              sortOrder: sortOrder as 'asc' | 'desc',
-              page,
-              limit,
-            })
-            console.log(`📦 GET /api/products - Returning ${result.products.length} products`)
-            return NextResponse.json(result)
-          }
-        }
+        const childIds = allCategories ? getChildCategoryIds(categoryId, allCategories) : []
+        const allCategoryIds = [categoryId, ...childIds]
+        
+        console.log(`📂 Category "${category}" resolved to ID: ${categoryId}, with ${childIds.length} children`)
+        
+        // Always use categoryIds for consistent filtering
+        const backend = await createBackend()
+        const result = await backend.getProducts({
+          categoryIds: allCategoryIds,
+          search: search || undefined,
+          slug: slug || undefined,
+          tag: tag || undefined,
+          minPrice: minPrice ? parseFloat(minPrice) : undefined,
+          maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+          sortBy,
+          sortOrder: sortOrder as 'asc' | 'desc',
+          page,
+          limit,
+        })
+        console.log(`📦 GET /api/products - Returning ${result.products.length} products for category "${category}"`)
+        return NextResponse.json(result)
+      } else {
+        console.warn(`⚠️ Category slug "${category}" not found in database`)
       }
     }
     
