@@ -237,23 +237,27 @@ export default function AdminNewProductPage() {
     setLoading(true)
 
     try {
-      // Deep clean function to remove all 'undefined' strings and undefined values
-      const deepClean = (obj: any): any => {
-        if (obj === null || obj === undefined || obj === 'undefined') return undefined
-        if (typeof obj === 'string' && obj === 'undefined') return undefined
+      // Sanitize function to remove undefined/null/empty values
+      const sanitize = (obj: any): any => {
+        if (obj === null || obj === undefined) return undefined
+        if (typeof obj === 'string') {
+          const trimmed = obj.trim()
+          if (trimmed === '' || trimmed === 'undefined' || trimmed === 'null') return undefined
+          return trimmed
+        }
         if (Array.isArray(obj)) {
-          const cleaned = obj.map(item => deepClean(item)).filter(item => item !== undefined)
-          return cleaned.length > 0 ? cleaned : []
+          const cleaned = obj.map(item => sanitize(item)).filter(item => item !== undefined)
+          return cleaned.length > 0 ? cleaned : undefined
         }
         if (typeof obj === 'object') {
           const cleaned: any = {}
           for (const [key, value] of Object.entries(obj)) {
-            const cleanValue = deepClean(value)
-            if (cleanValue !== undefined && cleanValue !== 'undefined') {
+            const cleanValue = sanitize(value)
+            if (cleanValue !== undefined) {
               cleaned[key] = cleanValue
             }
           }
-          return cleaned
+          return Object.keys(cleaned).length > 0 ? cleaned : undefined
         }
         return obj
       }
@@ -268,35 +272,54 @@ export default function AdminNewProductPage() {
         package_includes: formData.package_includes,
       }
 
-      const { material, contents, capacity, dimensions, weight, color, package_includes, category_id, category_ids, id, ...restFormData } = formData
+      const { material, contents, capacity, dimensions, weight, color, package_includes, ...restFormData } = formData
+
+      // Filter category IDs to only valid UUIDs
+      const validCategoryIds = selectedCategories
+        .filter(c => {
+          if (!c || typeof c !== 'string') return false
+          const trimmed = c.trim()
+          return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)
+        })
+        .map(c => c.trim())
 
       const cleanData = {
         ...restFormData,
         price: parseFloat(formData.price) || 0,
-        original_price: formData.original_price ? parseFloat(formData.original_price) : null,
+        original_price: formData.original_price ? parseFloat(formData.original_price) : undefined,
         stock: parseInt(formData.stock) || 0,
-        images: images.length > 0 ? images : [],
-        section_images: sectionImages.length > 0 ? sectionImages : [],
-        banner_image: bannerImage || null,
+        images: images.length > 0 ? images : undefined,
+        section_images: sectionImages.length > 0 ? sectionImages : undefined,
+        banner_image: bannerImage || undefined,
         tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
-        category_ids: selectedCategories.filter(c => c && c !== 'undefined' && c !== 'null').length > 0 
-          ? selectedCategories.filter(c => c && c !== 'undefined' && c !== 'null') 
-          : [],
         specifications,
-        features: features.length > 0 ? features : [],
+        features: features
+          .filter(f => f.title)
+          .map(f => ({
+            title: f.title,
+            icon_url: f.icon_url || undefined,
+            description: f.description || undefined,
+          })),
         has_variations: variations.length > 0,
-        variations: variations.map((v) => ({
-          color_name: v.color_name || null,
-          color_hex: v.color_hex || '#000000',
-          sku: v.sku || '',
-          price: v.price ? parseFloat(v.price) : null,
-          stock: parseInt(v.stock) || 0,
-          image_url: v.image_url || null,
-        })),
+        variations: variations.length > 0 ? variations
+          .filter(v => v.color_name || v.sku || v.price)
+          .map((v) => ({
+            color_name: v.color_name || undefined,
+            color_hex: v.color_hex || '#000000',
+            sku: v.sku || undefined,
+            price: v.price ? parseFloat(v.price) : undefined,
+            stock: parseInt(v.stock) || 0,
+            image_url: v.image_url || undefined,
+          })) : undefined,
       }
 
-      // Deep clean the entire payload
-      const finalData = deepClean(cleanData)
+      // Only include category_ids if there are valid ones
+      if (validCategoryIds.length > 0) {
+        cleanData.category_ids = validCategoryIds
+      }
+
+      // Sanitize the entire payload
+      const finalData = sanitize(cleanData)
 
       const res = await fetch('/api/products', {
         method: 'POST',
