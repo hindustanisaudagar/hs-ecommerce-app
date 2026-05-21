@@ -128,7 +128,7 @@ export function Header() {
   const handleMouseLeave = () => {
     const timeout = setTimeout(() => {
       setActiveDropdown(null)
-    }, 300)
+    }, 500)
     setDropdownTimeout(timeout)
   }
 
@@ -414,7 +414,7 @@ export function Header() {
                   <div
                     key={category.id}
                     className="relative group"
-                    onMouseEnter={() => category.children?.length > 0 && handleMouseEnter(category.slug)}
+                    onMouseEnter={() => category.children?.length > 0 ? handleMouseEnter(category.slug) : undefined}
                     onMouseLeave={category.children?.length > 0 ? handleMouseLeave : undefined}
                   >
                     <Link
@@ -436,12 +436,16 @@ export function Header() {
 
                     {/* Desktop Dropdown - Full width mega menu */}
                     {category.children?.length > 0 && (
-                      <div className={cn(
-                        "absolute top-full left-1/2 -translate-x-1/2 pt-3 transition-all duration-200 ease-out z-50",
-                        activeDropdown === category.slug 
-                          ? "opacity-100 visible translate-y-0" 
-                          : "opacity-0 invisible -translate-y-2 pointer-events-none"
-                      )}>
+                      <div
+                        className={cn(
+                          "absolute top-full left-1/2 -translate-x-1/2 pt-3 transition-all duration-200 ease-out z-50",
+                          activeDropdown === category.slug 
+                            ? "opacity-100 visible translate-y-0" 
+                            : "opacity-0 invisible -translate-y-2 pointer-events-none"
+                        )}
+                        onMouseEnter={() => handleMouseEnter(category.slug)}
+                        onMouseLeave={handleMouseLeave}
+                      >
                         <div className="bg-background border border-border/50 shadow-premium-lg rounded-xl p-6 min-w-[600px] max-w-[900px]">
                           <div className={cn(
                             "grid",
@@ -492,15 +496,6 @@ export function Header() {
             )}
           </div>
         </div>
-
-        {/* Invisible bridge to prevent dropdown from closing */}
-        {activeDropdown && (
-          <div 
-            className="fixed top-0 left-0 right-0 bottom-0 z-40"
-            onMouseEnter={() => {}}
-            onMouseLeave={handleMouseLeave}
-          />
-        )}
       </nav>
     </header>
   )

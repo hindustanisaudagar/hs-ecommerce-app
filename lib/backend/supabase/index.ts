@@ -6,6 +6,56 @@ export function createSupabaseBackend(): BackendProvider {
     async getProducts(params: ProductQuery): Promise<ProductResponse> {
       const supabase = await createClient()
       
+      // If categoryIds is provided, we need to check both category_id and category_ids
+      if (params.categoryIds) {
+        let query = supabase
+          .from('products')
+          .select('*, category:categories(name, slug)', { count: 'exact' })
+          .eq('is_active', true)
+          .or(
+            `category_id.in.(${params.categoryIds.join(',')})`
+          )
+        
+        if (params.slug) {
+          query = query.eq('slug', params.slug)
+        }
+        
+        if (params.tag) {
+          query = query.contains('tags', [params.tag])
+        }
+        
+        if (params.search) {
+          const searchTerm = `%${params.search}%`
+          query = query.or(
+            `name.ilike.${searchTerm},sku.ilike.${searchTerm},specifications->>color.ilike.${searchTerm}`
+          )
+        }
+        
+        if (params.minPrice) {
+          query = query.gte('price', params.minPrice)
+        }
+        
+        if (params.maxPrice) {
+          query = query.lte('price', params.maxPrice)
+        }
+        
+        query = query
+          .order(params.sortBy || 'created_at', { ascending: params.sortOrder === 'asc' })
+          .range((params.page! - 1) * params.limit!, params.page! * params.limit! - 1)
+        
+        const { data, error, count } = await query
+        
+        if (error) throw error
+        
+        return {
+          products: data || [],
+          total: count || 0,
+          page: params.page || 1,
+          limit: params.limit || 12,
+          totalPages: Math.ceil((count || 0) / (params.limit || 12)),
+        }
+      }
+      
       let query = supabase
         .from('products')
         .select('*, category:categories(name, slug)', { count: 'exact' })
@@ -17,10 +67,6 @@ export function createSupabaseBackend(): BackendProvider {
       
       if (params.category) {
         query = query.eq('category_id', params.category)
-      }
-      
-      if (params.categoryIds) {
-        query = query.overlaps('category_ids', params.categoryIds)
       }
       
       if (params.tag) {
