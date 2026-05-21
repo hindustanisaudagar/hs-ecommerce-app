@@ -494,39 +494,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         </section>
       )}
 
-      {/* Tradition Section */}
-      {(product.tradition_section || product.tradition_banner) && (
-        <section className="py-16 bg-warm-beige/40">
-          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-6">
-            {product.tradition_banner && (
-              <Reveal>
-                <div className="relative w-full overflow-hidden rounded-3xl bg-warm-beige">
-                  <Image
-                    src={product.tradition_banner}
-                    alt="Tradition Banner"
-                    width={1440}
-                    height={480}
-                    className="w-full h-auto object-contain"
-                    loading="lazy"
-                  />
-                </div>
-              </Reveal>
-            )}
-            {product.tradition_section && (
-              <Reveal>
-                <div className="pt-4">
-                  <h2 className="font-serif text-2xl text-ink mb-6">Tradition & Craftsmanship</h2>
-                  <div 
-                    className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
-                    dangerouslySetInnerHTML={{ __html: product.tradition_section }}
-                  />
-                </div>
-              </Reveal>
-            )}
-          </div>
-        </section>
-      )}
-
       {/* Made in India Section */}
       {(product.made_in_india_section || product.made_in_india_banner) && (
         <section className="py-16 bg-cream">
@@ -574,19 +541,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   className="w-full h-auto object-contain"
                   loading="lazy"
                 />
-              </div>
-            </Reveal>
-          </div>
-        </section>
-      )}
-
-      {/* Handmade Disclaimer */}
-      {product.handmade_disclaimer && (
-        <section className="py-12 bg-warm-beige/40">
-          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16">
-            <Reveal>
-              <div className="bg-cream rounded-2xl p-8 text-center">
-                <p className="text-sm text-ink/70 italic">{product.handmade_disclaimer}</p>
               </div>
             </Reveal>
           </div>

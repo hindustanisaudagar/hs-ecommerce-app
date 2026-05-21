@@ -26,11 +26,15 @@ export interface Product {
   feature_icons?: string[]
   section_images?: string[]
   banner_image?: string
+  product_story_banner?: string
+  tradition_banner?: string
+  made_in_india_banner?: string
   meta_title?: string
   meta_description?: string
   category_ids?: string[]
   is_comparable?: boolean
   has_variations?: boolean
+  gst_rate?: number
   
   category?: Category
   variations?: ProductVariation[]
@@ -94,6 +98,13 @@ export interface Order {
   razorpay_payment_id: string | null
   created_at: string
   items?: OrderItem[]
+  // GST fields
+  cgst?: number
+  sgst?: number
+  igst?: number
+  tax_amount?: number
+  subtotal?: number
+  shipping_cost?: number
 }
 
 export interface OrderItem {

@@ -38,6 +38,14 @@ export interface OrderInput {
   billing_address: Record<string, any> | null
   payment_method: string
   user_id?: string
+  // GST fields
+  subtotal?: number
+  shipping_cost?: number
+  cgst?: number
+  sgst?: number
+  igst?: number
+  tax_amount?: number
+  total_amount?: number
 }
 
 export interface BackendProvider {

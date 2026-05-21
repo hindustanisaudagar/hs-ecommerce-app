@@ -19,6 +19,20 @@ declare global {
 
 type PaymentMethod = 'razorpay' | 'cashfree' | 'cod'
 
+const BUSINESS_STATE = 'Haryana'
+const GST_RATE = 5 // 5% for all handicrafts
+
+const indianStates = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+  'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+  'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+]
+
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, getTotalPrice, clearCart } = useCart()
@@ -37,9 +51,17 @@ export default function CheckoutPage() {
   })
 
   const shipping = getTotalPrice() > 2000 ? 0 : 150
-  const total = getTotalPrice() + shipping
+  
+  // Calculate GST
+  const isSameState = formData.state && formData.state.toLowerCase() === BUSINESS_STATE.toLowerCase()
+  const cgst = isSameState ? (getTotalPrice() * (GST_RATE / 2)) / 100 : 0
+  const sgst = isSameState ? (getTotalPrice() * (GST_RATE / 2)) / 100 : 0
+  const igst = !isSameState && formData.state ? (getTotalPrice() * GST_RATE) / 100 : 0
+  const taxAmount = cgst + sgst + igst
+  
+  const total = getTotalPrice() + shipping + taxAmount
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
@@ -116,6 +138,13 @@ export default function CheckoutPage() {
           shipping_address: formData,
           billing_address: formData,
           payment_method: 'cod',
+          subtotal: getTotalPrice(),
+          shipping_cost: shipping,
+          cgst,
+          sgst,
+          igst,
+          tax_amount: taxAmount,
+          total_amount: total,
         }),
       })
 
@@ -155,6 +184,13 @@ export default function CheckoutPage() {
           shipping_address: formData,
           billing_address: formData,
           payment_method: paymentMethod,
+          subtotal: getTotalPrice(),
+          shipping_cost: shipping,
+          cgst,
+          sgst,
+          igst,
+          tax_amount: taxAmount,
+          total_amount: total,
         }),
       })
 
@@ -325,14 +361,18 @@ export default function CheckoutPage() {
                       <label className="block text-sm text-muted-foreground mb-2">
                         State *
                       </label>
-                      <input
-                        type="text"
+                      <select
                         name="state"
                         required
                         value={formData.state}
                         onChange={handleChange}
                         className="w-full px-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
-                      />
+                      >
+                        <option value="">Select State</option>
+                        {indianStates.map((state) => (
+                          <option key={state} value={state}>{state}</option>
+                        ))}
+                      </select>
                     </div>
 
                     <div>
@@ -470,11 +510,38 @@ export default function CheckoutPage() {
                           )}
                         </span>
                       </div>
+                      
+                      {/* GST Breakdown */}
+                      {formData.state && (
+                        <div className="pt-2 border-t border-border/50 space-y-2">
+                          <p className="text-xs text-muted-foreground">
+                            {isSameState ? 'Intra-state (Haryana)' : 'Inter-state'} GST @ 5%
+                          </p>
+                          {isSameState ? (
+                            <>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">CGST (2.5%)</span>
+                                <span className="text-ink">₹{cgst.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">SGST (2.5%)</span>
+                                <span className="text-ink">₹{sgst.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">IGST (5%)</span>
+                              <span className="text-ink">{igst.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
                       <div className="border-t border-border/50 pt-2">
                         <div className="flex justify-between">
                           <span className="font-medium text-ink">Total</span>
                           <span className="font-medium text-ink text-lg">
-                            ₹{total.toLocaleString('en-IN')}
+                            ₹{total.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                           </span>
                         </div>
                       </div>

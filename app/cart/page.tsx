@@ -9,11 +9,34 @@ import { Footer } from '@/components/footer'
 import { Reveal } from '@/components/reveal'
 import { useCart } from '@/hooks/store/use-cart'
 
+const BUSINESS_STATE = 'Haryana'
+
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice, clearCart } = useCart()
+  const [userState, setUserState] = useState('')
 
   const shipping = getTotalPrice() > 2000 ? 0 : 150
-  const total = getTotalPrice() + shipping
+  
+  // Calculate GST
+  const gstRate = 5 // 5% for all handicrafts
+  const isSameState = userState && userState.toLowerCase() === BUSINESS_STATE.toLowerCase()
+  const cgst = isSameState ? (getTotalPrice() * (gstRate / 2)) / 100 : 0
+  const sgst = isSameState ? (getTotalPrice() * (gstRate / 2)) / 100 : 0
+  const igst = !isSameState && userState ? (getTotalPrice() * gstRate) / 100 : 0
+  const taxAmount = cgst + sgst + igst
+  
+  const total = getTotalPrice() + shipping + taxAmount
+
+  const indianStates = [
+    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+    'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+    'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+    'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+    'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+    'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+    'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+  ]
 
   return (
     <main className="min-h-screen">
@@ -159,11 +182,55 @@ export default function CartPage() {
                           Free shipping on orders above ₹2,000
                         </p>
                       )}
+
+                      {/* State Selection for GST */}
+                      <div className="pt-4 border-t border-border/50">
+                        <label className="block text-sm text-muted-foreground mb-2">
+                          Delivery State *
+                        </label>
+                        <select
+                          value={userState}
+                          onChange={(e) => setUserState(e.target.value)}
+                          className="w-full px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50"
+                        >
+                          <option value="">Select State</option>
+                          {indianStates.map((state) => (
+                            <option key={state} value={state}>{state}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* GST Breakdown */}
+                      {userState && (
+                        <div className="pt-4 border-t border-border/50 space-y-2">
+                          <p className="text-xs text-muted-foreground">
+                            {isSameState ? 'Intra-state (Haryana)' : 'Inter-state'} GST @ 5%
+                          </p>
+                          {isSameState ? (
+                            <>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">CGST (2.5%)</span>
+                                <span className="text-ink">₹{cgst.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">SGST (2.5%)</span>
+                                <span className="text-ink">₹{sgst.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">IGST (5%)</span>
+                              <span className="text-ink">{igst.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <div className="border-t border-border/50 pt-4">
                         <div className="flex justify-between">
                           <span className="font-medium text-ink">Total</span>
                           <span className="font-medium text-ink text-lg">
-                            ₹{total.toLocaleString('en-IN')}
+                            ₹{total.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                           </span>
                         </div>
                       </div>

@@ -339,7 +339,7 @@ export function createSupabaseBackend(): BackendProvider {
     async createOrder(data: OrderInput) {
       const supabase = await createClient()
       
-      const total_amount = data.items.reduce(
+      const total_amount = data.total_amount || data.items.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
       )
@@ -350,6 +350,12 @@ export function createSupabaseBackend(): BackendProvider {
           {
             user_id: data.user_id || null,
             total_amount,
+            subtotal: data.subtotal || 0,
+            shipping_cost: data.shipping_cost || 0,
+            cgst: data.cgst || 0,
+            sgst: data.sgst || 0,
+            igst: data.igst || 0,
+            tax_amount: data.tax_amount || 0,
             shipping_address: data.shipping_address,
             billing_address: data.billing_address,
             payment_method: data.payment_method,

@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
 
     const body = await request.json()
-    const { items, shipping_address, billing_address, payment_method } = body
+    const { items, shipping_address, billing_address, payment_method, subtotal, shipping_cost, cgst, sgst, igst, tax_amount, total_amount } = body
 
     if (!items || items.length === 0) {
       return NextResponse.json(
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const total_amount = items.reduce(
+    const orderTotal = total_amount || items.reduce(
       (sum: number, item: any) => sum + item.price * item.quantity,
       0
     )
@@ -61,17 +61,17 @@ export async function POST(request: Request) {
     let paymentData: any = {}
 
     if (payment_method === 'razorpay') {
-      const razorpayOrder = await createRazorpayOrder(total_amount)
+      const razorpayOrder = await createRazorpayOrder(orderTotal)
       paymentData = {
         razorpay_order_id: razorpayOrder.id,
         razorpay_key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: total_amount,
+        amount: orderTotal,
       }
     } else if (payment_method === 'cashfree') {
       const orderId = `order_${Date.now()}`
       const cashfreeOrder = await createCashfreeOrder(
         orderId,
-        total_amount,
+        orderTotal,
         shipping_address.name,
         shipping_address.email,
         shipping_address.phone
@@ -79,11 +79,11 @@ export async function POST(request: Request) {
       paymentData = {
         payment_session_id: cashfreeOrder.payment_session_id,
         order_id: orderId,
-        amount: total_amount,
+        amount: orderTotal,
       }
     } else if (payment_method === 'cod') {
       paymentData = {
-        amount: total_amount,
+        amount: orderTotal,
       }
     }
 
@@ -95,6 +95,13 @@ export async function POST(request: Request) {
       billing_address,
       payment_method,
       user_id: user?.id,
+      subtotal: subtotal || 0,
+      shipping_cost: shipping_cost || 0,
+      cgst: cgst || 0,
+      sgst: sgst || 0,
+      igst: igst || 0,
+      tax_amount: tax_amount || 0,
+      total_amount: orderTotal,
     })
 
     return NextResponse.json({
