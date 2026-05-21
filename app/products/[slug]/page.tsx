@@ -235,16 +235,27 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                         <button
                           key={variation.id}
                           onClick={() => setSelectedVariation(variation)}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
+                          className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all ${
                             selectedVariation?.id === variation.id
                               ? 'ring-2 ring-terracotta border-terracotta bg-terracotta/5'
                               : 'border-border/50 hover:border-terracotta/50'
                           }`}
                         >
-                          <span
-                            className="w-6 h-6 rounded-full border border-border/50"
-                            style={{ backgroundColor: variation.color_hex || '#000' }}
-                          />
+                          {variation.image_url ? (
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-warm-beige shrink-0">
+                              <Image
+                                src={variation.image_url}
+                                alt={variation.color_name}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <span
+                              className="w-8 h-8 rounded-full border border-border/50 shrink-0"
+                              style={{ backgroundColor: variation.color_hex || '#000' }}
+                            />
+                          )}
                           <span className="text-sm text-ink">{variation.color_name}</span>
                         </button>
                       ))}
@@ -386,15 +397,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       {/* Product Description Section */}
       {(product.description || product.banner_image) && (
         <section className="py-16 bg-cream">
-          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-8">
+          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-6">
             {product.banner_image && (
               <Reveal>
-                <div className="relative aspect-[3/1] overflow-hidden rounded-3xl">
+                <div className="relative w-full overflow-hidden rounded-3xl bg-warm-beige">
                   <Image
                     src={product.banner_image}
                     alt="Product Description Banner"
-                    fill
-                    className="object-cover"
+                    width={1440}
+                    height={480}
+                    className="w-full h-auto object-contain"
                     loading="lazy"
                   />
                 </div>
@@ -402,10 +414,13 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             )}
             {product.description && (
               <Reveal>
-                <div 
-                  className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80 prose-a:text-terracotta"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
+                <div className="pt-4">
+                  <h2 className="font-serif text-2xl text-ink mb-6">Product Description</h2>
+                  <div 
+                    className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80 prose-a:text-terracotta"
+                    dangerouslySetInnerHTML={{ __html: product.description }}
+                  />
+                </div>
               </Reveal>
             )}
           </div>
@@ -415,15 +430,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       {/* Product Story Section */}
       {(product.product_story || product.product_story_banner) && (
         <section className="py-16 bg-warm-beige/40">
-          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-8">
+          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-6">
             {product.product_story_banner && (
               <Reveal>
-                <div className="relative aspect-[3/1] overflow-hidden rounded-3xl">
+                <div className="relative w-full overflow-hidden rounded-3xl bg-warm-beige">
                   <Image
                     src={product.product_story_banner}
                     alt="Product Story Banner"
-                    fill
-                    className="object-cover"
+                    width={1440}
+                    height={480}
+                    className="w-full h-auto object-contain"
                     loading="lazy"
                   />
                 </div>
@@ -431,10 +447,13 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             )}
             {product.product_story && (
               <Reveal>
-                <div 
-                  className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
-                  dangerouslySetInnerHTML={{ __html: product.product_story }}
-                />
+                <div className="pt-4">
+                  <h2 className="font-serif text-2xl text-ink mb-6">Tradition in Form, Art in Soul</h2>
+                  <div 
+                    className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
+                    dangerouslySetInnerHTML={{ __html: product.product_story }}
+                  />
+                </div>
               </Reveal>
             )}
           </div>
@@ -478,15 +497,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       {/* Tradition Section */}
       {(product.tradition_section || product.tradition_banner) && (
         <section className="py-16 bg-warm-beige/40">
-          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-8">
+          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-6">
             {product.tradition_banner && (
               <Reveal>
-                <div className="relative aspect-[3/1] overflow-hidden rounded-3xl">
+                <div className="relative w-full overflow-hidden rounded-3xl bg-warm-beige">
                   <Image
                     src={product.tradition_banner}
                     alt="Tradition Banner"
-                    fill
-                    className="object-cover"
+                    width={1440}
+                    height={480}
+                    className="w-full h-auto object-contain"
                     loading="lazy"
                   />
                 </div>
@@ -494,10 +514,13 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             )}
             {product.tradition_section && (
               <Reveal>
-                <div 
-                  className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
-                  dangerouslySetInnerHTML={{ __html: product.tradition_section }}
-                />
+                <div className="pt-4">
+                  <h2 className="font-serif text-2xl text-ink mb-6">Tradition & Craftsmanship</h2>
+                  <div 
+                    className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
+                    dangerouslySetInnerHTML={{ __html: product.tradition_section }}
+                  />
+                </div>
               </Reveal>
             )}
           </div>
@@ -507,15 +530,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       {/* Made in India Section */}
       {(product.made_in_india_section || product.made_in_india_banner) && (
         <section className="py-16 bg-cream">
-          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-8">
+          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16 space-y-6">
             {product.made_in_india_banner && (
               <Reveal>
-                <div className="relative aspect-[3/1] overflow-hidden rounded-3xl">
+                <div className="relative w-full overflow-hidden rounded-3xl bg-warm-beige">
                   <Image
                     src={product.made_in_india_banner}
                     alt="Made in India Banner"
-                    fill
-                    className="object-cover"
+                    width={1440}
+                    height={480}
+                    className="w-full h-auto object-contain"
                     loading="lazy"
                   />
                 </div>
@@ -523,12 +547,35 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             )}
             {product.made_in_india_section && (
               <Reveal>
-                <div 
-                  className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
-                  dangerouslySetInnerHTML={{ __html: product.made_in_india_section }}
-                />
+                <div className="pt-4">
+                  <h2 className="font-serif text-2xl text-ink mb-6">Made in India</h2>
+                  <div 
+                    className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink/80"
+                    dangerouslySetInnerHTML={{ __html: product.made_in_india_section }}
+                  />
+                </div>
               </Reveal>
             )}
+          </div>
+        </section>
+      )}
+
+      {/* Local Hands Global Elegance Banner */}
+      {product.banner_image && (
+        <section className="py-8 bg-warm-beige/40">
+          <div className="max-w-[1440px] mx-auto px-6 md:px-10 lg:px-16">
+            <Reveal>
+              <div className="relative w-full overflow-hidden rounded-3xl bg-warm-beige">
+                <Image
+                  src={product.banner_image}
+                  alt="Local Hands, Global Elegance"
+                  width={1440}
+                  height={480}
+                  className="w-full h-auto object-contain"
+                  loading="lazy"
+                />
+              </div>
+            </Reveal>
           </div>
         </section>
       )}
