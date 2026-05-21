@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Cormorant_Garamond, Tiro_Devanagari_Hindi } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { ChatButton } from '@/components/chat-button'
 import { CompareBar } from '@/components/compare-bar'
 import './globals.css'
 
@@ -49,6 +50,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         {children}
         <CompareBar />
+        <ChatButton />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
