@@ -32,17 +32,31 @@ export function Categories() {
     try {
       setLoading(true)
       
-      // Fetch categories with hierarchical data
-      const catRes = await fetch('/api/categories?hierarchical=true&limit=8')
-      const catData = await catRes.json()
-      setCategories(catData || [])
-      
-      // Fetch section content
+      // Fetch section content first to check for independent categories
       const contentRes = await fetch('/api/admin/landing-page?section=categories')
       if (contentRes.ok) {
         const contentData = await contentRes.json()
-        if (contentData.content) setContent((prev: any) => ({ ...prev, ...contentData.content }))
+        if (contentData.content) {
+          setContent((prev: any) => ({ ...prev, ...contentData.content }))
+          // If independent items exist, use them instead of DB categories
+          if (contentData.content.items && contentData.content.items.length > 0) {
+            setCategories(contentData.content.items.map((item: any) => ({
+              id: item.name,
+              name: item.name,
+              slug: item.link || '',
+              description: null,
+              image: item.image || null,
+            })))
+            setLoading(false)
+            return
+          }
+        }
       }
+      
+      // Fallback to database categories
+      const catRes = await fetch('/api/categories?hierarchical=true&limit=8')
+      const catData = await catRes.json()
+      setCategories(catData || [])
     } catch (error) {
       console.error('Failed to fetch categories:', error)
     } finally {
@@ -92,7 +106,7 @@ export function Categories() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
           {categories.map((category, index) => (
             <Reveal key={category.id} delay={index * 80}>
-              <Link href={`/products?category=${category.slug}`} className="group block">
+              <Link href={category.slug.startsWith('/') ? category.slug : `/products?category=${category.slug}`} className="group block">
                 <div className="relative aspect-[4/5] overflow-hidden rounded-2xl md:rounded-3xl shadow-premium transition-all duration-500 group-hover:shadow-premium-lg">
                   {category.image ? (
                     <Image
@@ -106,7 +120,6 @@ export function Categories() {
                       <span className="text-4xl font-serif text-muted-foreground/30">{category.name.charAt(0)}</span>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
                   
                   <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6">
                     {category.description && (

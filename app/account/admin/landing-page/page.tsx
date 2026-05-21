@@ -111,6 +111,11 @@ export default function AdminLandingPage() {
           const index = parseInt(e.target.dataset.index || '0')
           slides[index] = { ...slides[index], image: data.url, type: data.resource_type || 'image' }
           return { ...prev, [activeSection]: { ...section, slides } }
+        } else if (field === 'cat_images') {
+          const items = [...(section.items || [])]
+          const index = parseInt(e.target.dataset.index || '0')
+          items[index] = { ...items[index], image: data.url }
+          return { ...prev, [activeSection]: { ...section, items } }
         } else {
           return { ...prev, [activeSection]: { ...section, [field]: data.url, media_type: data.resource_type || 'image' } }
         }
@@ -408,12 +413,86 @@ export default function AdminLandingPage() {
     )
   }
 
-  const renderSimpleTextSection = (sectionId: string, title: string) => {
-    const data = content[sectionId] || {}
+  const renderCategoriesSection = () => {
+    const data = content.categories || {}
+    const items = data.items || []
     return (
       <div className="space-y-6">
-        <h3 className="font-medium text-ink text-lg">{title}</h3>
-        {renderGridFields([{ field: 'label', label: 'Label' }, { field: 'title', label: 'Title' }])}
+        <h3 className="font-medium text-ink text-lg">Categories Section (Independent)</h3>
+        <p className="text-sm text-muted-foreground">Add custom categories for the homepage. These are independent from the main categories database.</p>
+        
+        {renderGridFields([{ field: 'label', label: 'Section Label' }, { field: 'title', label: 'Section Title' }])}
+        {renderTextField('view_all_link', 'View All Link', 'url')}
+        {renderTextField('view_all_text', 'View All Text')}
+
+        <div className="space-y-4 pt-4 border-t border-border/50">
+          <h4 className="font-medium text-ink">Category Items</h4>
+          {items.map((item: any, index: number) => (
+            <div key={index} className="p-4 bg-warm-beige/30 rounded-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-ink">Item {index + 1}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newItems = items.filter((_: any, i: number) => i !== index)
+                    updateField('items', newItems)
+                  }}
+                  className="text-red-500 hover:text-red-600 text-sm"
+                >
+                  Remove
+                </button>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-2">Name</label>
+                  <input
+                    type="text"
+                    value={item.name || ''}
+                    onChange={(e) => updateNestedField('items', index, 'name', e.target.value)}
+                    className="w-full px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-2">Link URL</label>
+                  <input
+                    type="text"
+                    value={item.link || ''}
+                    onChange={(e) => updateNestedField('items', index, 'link', e.target.value)}
+                    className="w-full px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">Image</label>
+                <div className="flex items-start gap-4">
+                  {item.image && (
+                    <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-warm-beige">
+                      <Image src={item.image} alt="" fill className="object-cover" />
+                    </div>
+                  )}
+                  <div>
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload('cat_images', e)} disabled={uploading && uploadField === 'cat_images'} className="hidden" id={`cat-img-${index}`} data-index={index} />
+                    <button type="button" onClick={() => document.getElementById(`cat-img-${index}`)?.click()} disabled={uploading && uploadField === 'cat_images'} className="flex items-center gap-2 px-4 py-2 bg-warm-beige/50 border border-border/50 rounded-lg text-sm hover:bg-warm-beige transition-colors disabled:opacity-50">
+                      {uploading && uploadField === 'cat_images' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                      {uploading && uploadField === 'cat_images' ? 'Uploading...' : 'Upload Image'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              const newItems = [...items, { name: '', link: '', image: '' }]
+              updateField('items', newItems)
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-ink text-cream rounded-lg text-sm hover:bg-ink/90 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Category Item
+          </button>
+        </div>
       </div>
     )
   }
@@ -426,7 +505,7 @@ export default function AdminLandingPage() {
       case 'instagram': return renderInstagramSection()
       case 'marketplaces': return renderMarketplacesSection()
       case 'footer': return renderFooterSection()
-      case 'categories': return renderSimpleTextSection('categories', 'Categories Section')
+      case 'categories': return renderCategoriesSection()
       case 'bestsellers': return renderSimpleTextSection('bestsellers', 'Bestsellers Section')
       case 'reviews': return renderSimpleTextSection('reviews', 'Reviews Section')
       case 'newsletter': return renderSimpleTextSection('newsletter', 'Newsletter Section')
