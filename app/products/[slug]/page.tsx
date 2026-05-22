@@ -15,8 +15,11 @@ import { Product, ProductVariation } from '@/types'
 export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const [product, setProduct] = useState<Product | null>(null)
+  const [originalProduct, setOriginalProduct] = useState<Product | null>(null)
+  const [originalVariations, setOriginalVariations] = useState<ProductVariation[]>([])
   const [variations, setVariations] = useState<ProductVariation[]>([])
   const [loading, setLoading] = useState(true)
+  const [variationLoading, setVariationLoading] = useState(false)
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null)
@@ -37,16 +40,48 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       const data = await res.json()
       const foundProduct = data.products?.[0] || null
       setProduct(foundProduct)
+      setOriginalProduct(foundProduct)
 
       if (foundProduct?.has_variations && foundProduct.id) {
         const varRes = await fetch(`/api/products/${foundProduct.id}/variations`)
         const varData = await varRes.json()
         setVariations(varData.variations || [])
+        setOriginalVariations(varData.variations || [])
       }
     } catch (error) {
       console.error('Failed to fetch product:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchProductBySku = async (sku: string) => {
+    setVariationLoading(true)
+    try {
+      const res = await fetch(`/api/products?sku=${encodeURIComponent(sku)}&limit=1`)
+      const data = await res.json()
+      const found = data.products?.[0] || null
+      if (found) {
+        setProduct(found)
+        if (found.has_variations && found.id) {
+          const varRes = await fetch(`/api/products/${found.id}/variations`)
+          const varData = await varRes.json()
+          setVariations(varData.variations || [])
+        } else {
+          setVariations([])
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch variation product:', e)
+    } finally {
+      setVariationLoading(false)
+    }
+  }
+
+  const resetToOriginalProduct = () => {
+    if (originalProduct) {
+      setProduct(originalProduct)
+      setVariations(originalVariations)
     }
   }
 
@@ -149,7 +184,15 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             {/* Image Gallery */}
             <div className="space-y-4">
               <div className="relative aspect-square overflow-hidden rounded-3xl bg-cream">
-                {product.images?.[selectedImage] ? (
+                {selectedVariation?.image_url ? (
+                  <Image
+                    src={selectedVariation.image_url}
+                    alt={`${product.name} - ${selectedVariation.color_name}`}
+                    fill
+                    className="object-cover"
+                    loading="lazy"
+                  />
+                ) : product.images?.[selectedImage] ? (
                   <Image
                     src={product.images[selectedImage]}
                     alt={product.name}
@@ -169,14 +212,28 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 )}
               </div>
 
-              {product.images && product.images.length > 1 && (
+              {(product.images && product.images.length > 1) && (
                 <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
+                  {selectedVariation?.image_url && (
+                    <button
+                      onClick={() => setSelectedVariation(selectedVariation)}
+                      className={`relative aspect-square overflow-hidden rounded-xl bg-cream transition-all ring-2 ring-terracotta`}
+                    >
+                      <Image
+                        src={selectedVariation.image_url}
+                        alt={selectedVariation.color_name}
+                        fill
+                        className="object-cover"
+                        loading="lazy"
+                      />
+                    </button>
+                  )}
                   {product.images.map((image, index) => (
                     <button
                       key={index}
-                      onClick={() => setSelectedImage(index)}
+                      onClick={() => { setSelectedImage(index); setSelectedVariation(null); resetToOriginalProduct() }}
                       className={`relative aspect-square overflow-hidden rounded-xl bg-cream transition-all ${
-                        selectedImage === index ? 'ring-2 ring-terracotta' : 'opacity-70 hover:opacity-100'
+                        !selectedVariation?.image_url && selectedImage === index ? 'ring-2 ring-terracotta' : 'opacity-70 hover:opacity-100'
                       }`}
                     >
                       <Image
@@ -188,6 +245,23 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                       />
                     </button>
                   ))}
+                </div>
+              )}
+
+              {selectedVariation?.image_url && (!product.images || product.images.length <= 1) && (
+                <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
+                  <button
+                    onClick={() => setSelectedVariation(selectedVariation)}
+                    className={`relative aspect-square overflow-hidden rounded-xl bg-cream transition-all ring-2 ring-terracotta`}
+                  >
+                    <Image
+                      src={selectedVariation.image_url}
+                      alt={selectedVariation.color_name}
+                      fill
+                      className="object-cover"
+                      loading="lazy"
+                    />
+                  </button>
                 </div>
               )}
             </div>
@@ -234,7 +308,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                       {variations.map((variation) => (
                         <button
                           key={variation.id}
-                          onClick={() => setSelectedVariation(variation)}
+                          onClick={() => { setSelectedVariation(variation); setSelectedImage(-1); if (variation.sku) fetchProductBySku(variation.sku) }}
                           className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all ${
                             selectedVariation?.id === variation.id
                               ? 'ring-2 ring-terracotta border-terracotta bg-terracotta/5'

@@ -5,6 +5,7 @@ export interface ProductQuery {
   categoryIds?: string[]
   search?: string
   slug?: string
+  sku?: string
   tag?: string
   minPrice?: number
   maxPrice?: number

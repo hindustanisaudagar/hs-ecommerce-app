@@ -11,6 +11,7 @@ export async function GET(request: Request) {
     const categoryIds = searchParams.get('categoryIds')
     const search = searchParams.get('search')
     const slug = searchParams.get('slug')
+    const sku = searchParams.get('sku')
     const tag = searchParams.get('tag')
     const minPrice = searchParams.get('minPrice')
     const maxPrice = searchParams.get('maxPrice')
@@ -67,6 +68,7 @@ export async function GET(request: Request) {
           categoryIds: allCategoryIds,
           search: search || undefined,
           slug: slug || undefined,
+          sku: sku || undefined,
           tag: tag || undefined,
           minPrice: minPrice ? parseFloat(minPrice) : undefined,
           maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
@@ -89,6 +91,7 @@ export async function GET(request: Request) {
       categoryIds: categoryIds ? categoryIds.split(',') : undefined,
       search: search || undefined,
       slug: slug || undefined,
+      sku: sku || undefined,
       tag: tag || undefined,
       minPrice: minPrice ? parseFloat(minPrice) : undefined,
       maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,

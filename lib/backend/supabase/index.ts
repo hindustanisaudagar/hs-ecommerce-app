@@ -26,6 +26,10 @@ export function createSupabaseBackend(): BackendProvider {
           query = query.eq('slug', params.slug)
         }
         
+        if (params.sku) {
+          query = query.eq('sku', params.sku)
+        }
+        
         if (params.tag) {
           query = query.contains('tags', [params.tag])
         }
@@ -70,7 +74,11 @@ export function createSupabaseBackend(): BackendProvider {
       if (params.slug) {
         query = query.eq('slug', params.slug)
       }
-      
+
+      if (params.sku) {
+        query = query.eq('sku', params.sku)
+      }
+
       if (params.category) {
         query = query.eq('category_id', params.category)
       }
