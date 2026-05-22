@@ -60,39 +60,63 @@ export default function AdminDealsPage() {
     }
   }
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <div className="text-center py-12 text-muted-foreground">Loading...</div>
 
   return (
     <div>
       <h1 className="font-serif text-2xl text-ink mb-8">Manage Bulk & Wholesale Page</h1>
-      
+
       <form onSubmit={handleSubmit} className="bg-cream rounded-2xl p-8 shadow-premium space-y-6">
+        {/* Title */}
         <div>
-          <label className="block mb-2">Title</label>
-          <input 
-            value={data?.title || ''} 
-            onChange={(e) => setData({...data, title: e.target.value})}
-            className="w-full p-3 rounded-lg border"
+          <label className="block text-sm text-muted-foreground mb-2">Page Title</label>
+          <input
+            value={data?.title || ''}
+            onChange={(e) => setData({ ...data, title: e.target.value })}
+            className="w-full px-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink"
           />
         </div>
 
+        {/* Banner */}
         <div>
-          <label className="block mb-2">Banner</label>
+          <label className="block text-sm text-muted-foreground mb-2">Banner Image</label>
           {data?.banner_url ? (
-            <div className="relative w-full h-48 bg-gray-200 rounded-lg overflow-hidden">
+            <div className="relative w-full h-48 rounded-xl overflow-hidden bg-warm-beige border border-border/50">
               <img src={data.banner_url} alt="Banner" className="w-full h-full object-cover" />
-              <button type="button" onClick={() => setData({...data, banner_url: ''})} className="absolute top-2 right-2 bg-red-500 p-1 rounded-full"><X className="w-4 h-4 text-white"/></button>
+              <button type="button" onClick={() => setData({ ...data, banner_url: '' })} className="absolute top-2 right-2 bg-red-500 p-1.5 rounded-full hover:bg-red-600 transition-colors">
+                <X className="w-4 h-4 text-white" />
+              </button>
             </div>
           ) : (
-            <input type="file" onChange={handleUpload} disabled={uploading} className="w-full p-3 border rounded-lg" />
+            <div>
+              <input type="file" onChange={handleUpload} disabled={uploading} className="w-full px-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-ink file:text-cream file:text-sm" />
+              {uploading && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
+            </div>
           )}
+        </div>
+
+        {/* Content Editor (JSON) */}
+        <div>
+          <label className="block text-sm text-muted-foreground mb-2">Content (JSON)</label>
+          <textarea
+            value={JSON.stringify(data?.content || {}, null, 2)}
+            onChange={(e) => {
+              try {
+                const parsed = JSON.parse(e.target.value)
+                setData({ ...data, content: parsed })
+              } catch { }
+            }}
+            rows={15}
+            className="w-full px-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink font-mono text-sm"
+          />
         </div>
 
         <button
           type="submit"
           disabled={saving}
-          className="bg-ink text-cream px-6 py-3 rounded-xl text-sm hover:bg-ink/90"
+          className="flex items-center gap-2 bg-ink text-cream px-6 py-3 rounded-xl text-sm hover:bg-ink/90 transition-colors disabled:opacity-50"
         >
+          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </form>
