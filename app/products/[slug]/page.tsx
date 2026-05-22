@@ -242,22 +242,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 )}
               </div>
 
-              {(product.images && product.images.length > 1) && (
+              {product.images && product.images.length > 0 && (
                 <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
-                  {selectedVariation?.image_url && (
-                    <button
-                      onClick={() => setSelectedVariation(selectedVariation)}
-                      className={`relative aspect-square overflow-hidden rounded-lg bg-cream transition-all ring-2 ring-terracotta`}
-                    >
-                      <Image
-                        src={selectedVariation.image_url}
-                        alt={selectedVariation.color_name}
-                        fill
-                        className="object-cover"
-                        loading="lazy"
-                      />
-                    </button>
-                  )}
                   {product.images.map((image, index) => (
                     <button
                       key={index}
@@ -278,11 +264,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 </div>
               )}
 
-              {selectedVariation?.image_url && (!product.images || product.images.length <= 1) && (
+              {(!product.images || product.images.length === 0) && selectedVariation?.image_url && (
                 <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
                   <button
                     onClick={() => setSelectedVariation(selectedVariation)}
-                    className={`relative aspect-square overflow-hidden rounded-lg bg-cream transition-all ring-2 ring-terracotta`}
+                    className="relative aspect-square overflow-hidden rounded-lg bg-cream transition-all ring-2 ring-terracotta"
                   >
                     <Image
                       src={selectedVariation.image_url}
