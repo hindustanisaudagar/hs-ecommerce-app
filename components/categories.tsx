@@ -56,7 +56,7 @@ export function Categories() {
       // Fallback to database categories
       const catRes = await fetch('/api/categories?hierarchical=true&limit=8')
       const catData = await catRes.json()
-      setCategories(catData || [])
+      setCategories(Array.isArray(catData) ? catData : [])
     } catch (error) {
       console.error('Failed to fetch categories:', error)
     } finally {

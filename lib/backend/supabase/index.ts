@@ -8,14 +8,18 @@ export function createSupabaseBackend(): BackendProvider {
       
       // If categoryIds is provided, we need to check both category_id and category_ids
       if (params.categoryIds) {
-        // Format UUIDs with quotes for Supabase or() filter
-        const formattedIds = params.categoryIds.map(id => `"${id}"`).join(',')
+        // Correct formatting for Supabase filters
+        // category_id.in.(uuid1,uuid2)
+        // category_ids.ov.{uuid1,uuid2}
+        const formattedIds = params.categoryIds.join(',')
+        const arrayIds = `{${params.categoryIds.join(',')}}`
+        
         let query = supabase
           .from('products')
           .select('*, category:categories(name, slug)', { count: 'exact' })
           .eq('is_active', true)
           .or(
-            `category_id.in.(${formattedIds})`
+            `category_id.in.(${formattedIds}),category_ids.ov.${arrayIds}`
           )
         
         if (params.slug) {
