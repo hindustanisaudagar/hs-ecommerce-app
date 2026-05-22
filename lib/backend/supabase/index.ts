@@ -166,6 +166,17 @@ export function createSupabaseBackend(): BackendProvider {
         await supabase
           .from('product_variations')
           .insert(variationsWithProductId)
+
+        const productSku = product.sku
+        if (productSku) {
+          const skus = variations.map((v: any) => v.sku).filter(Boolean)
+          for (const sku of skus) {
+            await supabase
+              .from('products')
+              .update({ parent_sku: productSku })
+              .eq('sku', sku)
+          }
+        }
       }
       
       return product
@@ -174,6 +185,15 @@ export function createSupabaseBackend(): BackendProvider {
     async updateProduct(id: string, data: any) {
       const supabase = await createClient()
       const { variations, ...productData } = data
+      
+      let oldSkuList: string[] = []
+      if (variations) {
+        const { data: oldVars } = await supabase
+          .from('product_variations')
+          .select('sku')
+          .eq('product_id', id)
+        oldSkuList = (oldVars || []).map((v: any) => v.sku).filter(Boolean)
+      }
       
       const { data: product, error: productError } = await supabase
         .from('products')
@@ -199,6 +219,27 @@ export function createSupabaseBackend(): BackendProvider {
           await supabase
             .from('product_variations')
             .insert(variationsWithProductId)
+        }
+
+        const productSku = product.sku
+        if (productSku) {
+          const newSkuList = variations.map((v: any) => v.sku).filter(Boolean)
+
+          const removedSkus = oldSkuList.filter(s => !newSkuList.includes(s))
+          for (const sku of removedSkus) {
+            await supabase
+              .from('products')
+              .update({ parent_sku: null })
+              .eq('sku', sku)
+              .eq('parent_sku', productSku)
+          }
+
+          for (const sku of newSkuList) {
+            await supabase
+              .from('products')
+              .update({ parent_sku: productSku })
+              .eq('sku', sku)
+          }
         }
       }
       

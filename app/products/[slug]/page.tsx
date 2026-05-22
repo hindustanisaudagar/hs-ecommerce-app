@@ -42,14 +42,34 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       const data = await res.json()
       const foundProduct = data.products?.[0] || null
       setProduct(foundProduct)
-      setOriginalProduct(foundProduct)
       if (foundProduct?.sku) setActiveProductSku(foundProduct.sku)
 
-      if (foundProduct?.has_variations && foundProduct.id) {
+      if (foundProduct?.parent_sku) {
+        // Belongs to a group — fetch parent's variations for the switcher
+        const parentRes = await fetch(`/api/products?sku=${encodeURIComponent(foundProduct.parent_sku)}&limit=1`)
+        const parentData = await parentRes.json()
+        const parentProduct = parentData.products?.[0] || null
+        setOriginalProduct(parentProduct)
+
+        if (parentProduct?.has_variations && parentProduct.id) {
+          const varRes = await fetch(`/api/products/${parentProduct.id}/variations`)
+          const varData = await varRes.json()
+          setOriginalVariations(varData.variations || [])
+          setVariations(varData.variations || [])
+        } else {
+          setOriginalVariations([])
+          setVariations([])
+        }
+      } else if (foundProduct?.has_variations && foundProduct.id) {
+        setOriginalProduct(foundProduct)
         const varRes = await fetch(`/api/products/${foundProduct.id}/variations`)
         const varData = await varRes.json()
         setVariations(varData.variations || [])
         setOriginalVariations(varData.variations || [])
+      } else {
+        setOriginalProduct(foundProduct)
+        setOriginalVariations([])
+        setVariations([])
       }
     } catch (error) {
       console.error('Failed to fetch product:', error)
@@ -88,6 +108,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         } else {
           setVariations([])
         }
+      } else {
+        alert(`Product with SKU "${sku}" not found in database. Make sure a product exists with this SKU.`)
       }
     } catch (e) {
       console.error('Failed to fetch variation product:', e)
