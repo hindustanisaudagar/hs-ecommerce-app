@@ -11,6 +11,7 @@ import { Reviews } from "@/components/reviews"
 import { InstagramGallery } from "@/components/instagram-gallery"
 import { Newsletter } from "@/components/newsletter"
 import { Marketplaces } from "@/components/marketplaces"
+import { HindustaniSaudagarInfo } from "@/components/hindustani-saudagar-info"
 import { Footer } from "@/components/footer"
 import { ChatButton } from "@/components/chat-button"
 
@@ -30,8 +31,9 @@ export default function Home() {
         <InstagramGallery />
         <Newsletter />
         <Marketplaces />
+        <HindustaniSaudagarInfo />
         <Footer />
-      <ChatButton />
+        <ChatButton />
     </main>
   )
 }
