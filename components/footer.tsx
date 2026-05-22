@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from "next/link"
-import { Instagram, Facebook, Twitter, MapPin, Mail, Phone } from "lucide-react"
+import { Instagram, Facebook, Twitter, Mail, Phone } from "lucide-react"
 import { Reveal } from "@/components/reveal"
 
 const defaultFooter = {
@@ -74,9 +74,7 @@ export function Footer() {
             <Reveal>
               <div className="col-span-2">
                 <Link href="/" className="inline-flex items-center gap-3 mb-6 group">
-                  <div className="w-12 h-12 rounded-full bg-cream/10 flex items-center justify-center border border-cream/10 group-hover:border-terracotta/30 transition-colors">
-                    <span className="text-xl font-serif font-semibold">{content.brand_initials}</span>
-                  </div>
+                  <span className="text-xl font-serif font-semibold">{content.brand_initials}</span>
                   <div className="hidden sm:block">
                     <span className="font-serif text-lg">{content.brand_name}</span>
                   </div>
@@ -140,10 +138,6 @@ export function Footer() {
                   <p className="flex items-start gap-3">
                     <Phone className="w-4 h-4 mt-0.5 flex-shrink-0 text-terracotta-light" strokeWidth={1.5} />
                     {content.phone}
-                  </p>
-                  <p className="flex items-start gap-3">
-                    <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-terracotta-light" strokeWidth={1.5} />
-                    {content.address}
                   </p>
                 </div>
                 <div className="flex gap-3 mt-8">
