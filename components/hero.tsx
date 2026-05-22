@@ -132,7 +132,9 @@ export function Hero() {
         )}
       </div>
       
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
+      {currentSlide === 0 && (
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
+      )}
 
       {/* Navigation Arrows */}
       {slides.length > 1 && (
