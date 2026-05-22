@@ -300,12 +300,12 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </Reveal>
 
               {/* Color Variations */}
-              {variations.length > 0 && (
+              {originalVariations.length > 0 && (
                 <Reveal delay={200}>
                   <div>
                     <p className="text-sm text-muted-foreground mb-3">Color: <span className="text-ink font-medium">{selectedVariation?.color_name || 'Select'}</span></p>
                     <div className="flex flex-wrap gap-3">
-                      {variations.map((variation) => (
+                      {originalVariations.map((variation) => (
                         <button
                           key={variation.id}
                           onClick={() => { setSelectedVariation(variation); setSelectedImage(-1); if (variation.sku) fetchProductBySku(variation.sku) }}
