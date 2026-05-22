@@ -1,74 +1,8 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-...
-  const renderCategories = (cats: Category[], level = 0) => {
-    return cats.map((category) => (
-      <React.Fragment key={category.id}>
-        <tr className="hover:bg-warm-beige/30 transition-colors">
-          <td className="px-6 py-4">
-            <div className="flex items-center gap-3" style={{ paddingLeft: `${level * 24}px` }}>
-              {category.image ? (
-                <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-warm-beige flex-shrink-0">
-                  <Image
-                    src={category.image}
-                    alt={category.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="w-12 h-12 rounded-lg bg-warm-beige/50 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs text-muted-foreground">No img</span>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                {level > 0 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
-                <p className="font-medium text-ink">{category.name}</p>
-                {level === 0 && (
-                  <span className="text-xs text-muted-foreground bg-warm-beige/50 px-2 py-0.5 rounded">
-                    Main
-                  </span>
-                )}
-                {level === 1 && (
-                  <span className="text-xs text-muted-foreground bg-warm-beige/50 px-2 py-0.5 rounded">
-                    Sub
-                  </span>
-                )}
-                {level === 2 && (
-                  <span className="text-xs text-muted-foreground bg-warm-beige/50 px-2 py-0.5 rounded">
-                    Sub-Sub
-                  </span>
-                )}
-              </div>
-            </div>
-          </td>
-          <td className="px-6 py-4">
-            <p className="text-sm text-muted-foreground">{category.slug}</p>
-          </td>
-          <td className="px-6 py-4 text-right">
-            <div className="flex items-center justify-end gap-2">
-              <button
-                onClick={() => handleEdit(category)}
-                className="p-2 text-muted-foreground hover:text-terracotta transition-colors"
-              >
-                <Edit className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => handleDelete(category.id)}
-                className="p-2 text-muted-foreground hover:text-red-500 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </td>
-        </tr>
-        {category.children && renderCategories(category.children, level + 1)}
-      </React.Fragment>
-    ))
-  }
 
-interface FlatCategory {
+interface Category {
   id: string
   name: string
   level: number
@@ -315,24 +249,6 @@ export default function AdminCategoriesPage() {
         {category.children && renderCategories(category.children, level + 1)}
       </React.Fragment>
     ))
-  }
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure? This will also delete subcategories.')) return
-
-    try {
-      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' })
-      
-      if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || 'Failed to delete category')
-      }
-      
-      fetchCategories()
-    } catch (error: any) {
-      alert(error.message || 'Failed to delete category')
-      console.error('Failed to delete category:', error)
-    }
   }
 
   return (
