@@ -23,6 +23,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null)
+  const [loadedProducts, setLoadedProducts] = useState<Record<string, Product>>({})
+  const [activeProductSku, setActiveProductSku] = useState<string>('')
   const addItem = useCart((state) => state.addItem)
   const { toggleItem, isInWishlist } = useWishlist()
   const { addItem: addCompareItem, isInCompare } = useCompare()
@@ -41,6 +43,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       const foundProduct = data.products?.[0] || null
       setProduct(foundProduct)
       setOriginalProduct(foundProduct)
+      if (foundProduct?.sku) setActiveProductSku(foundProduct.sku)
 
       if (foundProduct?.has_variations && foundProduct.id) {
         const varRes = await fetch(`/api/products/${foundProduct.id}/variations`)
@@ -56,13 +59,28 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   }
 
   const fetchProductBySku = async (sku: string) => {
+    if (loadedProducts[sku]) {
+      const cached = loadedProducts[sku]
+      setProduct(cached)
+      setActiveProductSku(sku)
+      if (cached.has_variations && cached.id) {
+        const varRes = await fetch(`/api/products/${cached.id}/variations`)
+        const varData = await varRes.json()
+        setVariations(varData.variations || [])
+      } else {
+        setVariations([])
+      }
+      return
+    }
     setVariationLoading(true)
     try {
       const res = await fetch(`/api/products?sku=${encodeURIComponent(sku)}&limit=1`)
       const data = await res.json()
       const found = data.products?.[0] || null
       if (found) {
+        setLoadedProducts(prev => ({ ...prev, [sku]: found }))
         setProduct(found)
+        setActiveProductSku(sku)
         if (found.has_variations && found.id) {
           const varRes = await fetch(`/api/products/${found.id}/variations`)
           const varData = await varRes.json()
@@ -82,6 +100,9 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     if (originalProduct) {
       setProduct(originalProduct)
       setVariations(originalVariations)
+      setSelectedVariation(null)
+      setSelectedImage(0)
+      if (originalProduct.sku) setActiveProductSku(originalProduct.sku)
     }
   }
 
@@ -299,38 +320,53 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 </div>
               </Reveal>
 
-              {/* Color Variations */}
+              {/* Product Switcher */}
               {originalVariations.length > 0 && (
                 <Reveal delay={200}>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-3">Color: <span className="text-ink font-medium">{selectedVariation?.color_name || 'Select'}</span></p>
+                    <p className="text-sm text-muted-foreground mb-3">Select Product</p>
                     <div className="flex flex-wrap gap-3">
+                      {/* Original Product */}
+                      {originalProduct && (
+                        <button
+                          onClick={() => resetToOriginalProduct()}
+                          className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
+                            !selectedVariation
+                              ? 'ring-2 ring-terracotta border-terracotta'
+                              : 'border-border/50 hover:border-terracotta/50 opacity-60 hover:opacity-100'
+                          }`}
+                        >
+                          {originalProduct.images?.[0] ? (
+                            <Image src={originalProduct.images[0]} alt={originalProduct.name} fill className="object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-warm-beige flex items-center justify-center text-xs text-muted-foreground">No img</div>
+                          )}
+                        </button>
+                      )}
+
+                      {/* Variations */}
                       {originalVariations.map((variation) => (
                         <button
                           key={variation.id}
                           onClick={() => { setSelectedVariation(variation); setSelectedImage(-1); if (variation.sku) fetchProductBySku(variation.sku) }}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all ${
+                          className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
                             selectedVariation?.id === variation.id
-                              ? 'ring-2 ring-terracotta border-terracotta bg-terracotta/5'
-                              : 'border-border/50 hover:border-terracotta/50'
+                              ? 'ring-2 ring-terracotta border-terracotta'
+                              : 'border-border/50 hover:border-terracotta/50 opacity-60 hover:opacity-100'
                           }`}
                         >
                           {variation.image_url ? (
-                            <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-warm-beige shrink-0">
-                              <Image
-                                src={variation.image_url}
-                                alt={variation.color_name}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
+                            <Image src={variation.image_url} alt={variation.color_name || ''} fill className="object-cover" />
+                          ) : variation.color_hex ? (
+                            <div className="w-full h-full" style={{ backgroundColor: variation.color_hex }} />
                           ) : (
-                            <span
-                              className="w-8 h-8 rounded-full border border-border/50 shrink-0"
-                              style={{ backgroundColor: variation.color_hex || '#000' }}
-                            />
+                            <div className="w-full h-full bg-warm-beige flex items-center justify-center text-xs text-muted-foreground">No img</div>
                           )}
-                          <span className="text-sm text-ink">{variation.color_name}</span>
+                          {variation.color_name && (
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] bg-ink/70 text-cream px-1.5 py-0.5 rounded whitespace-nowrap">
+                              {variation.color_name}
+                            </span>
+                          )}
                         </button>
                       ))}
                     </div>
