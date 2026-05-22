@@ -252,9 +252,9 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   {product.images.map((image, index) => (
                     <button
                       key={index}
-                      onClick={() => { setSelectedImage(index); setSelectedVariation(null); resetToOriginalProduct() }}
+                      onClick={() => { setSelectedImage(index) }}
                       className={`relative aspect-square overflow-hidden rounded-xl bg-cream transition-all ${
-                        !selectedVariation?.image_url && selectedImage === index ? 'ring-2 ring-terracotta' : 'opacity-70 hover:opacity-100'
+                        selectedImage === index ? 'ring-2 ring-terracotta' : 'ring-1 ring-border/30 hover:ring-terracotta/50'
                       }`}
                     >
                       <Image
@@ -334,7 +334,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                             className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                               !selectedVariation
                                 ? 'ring-2 ring-terracotta border-terracotta'
-                                : 'border-border/50 hover:border-terracotta/50 opacity-60 hover:opacity-100'
+                                : 'border-border/50 hover:border-terracotta/50'
                             }`}
                           >
                             {originalProduct.images?.[0] ? (
@@ -354,7 +354,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                             className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                               selectedVariation?.id === variation.id
                                 ? 'ring-2 ring-terracotta border-terracotta'
-                                : 'border-border/50 hover:border-terracotta/50 opacity-60 hover:opacity-100'
+                                : 'border-border/50 hover:border-terracotta/50'
                             }`}
                           >
                             {variation.image_url ? (
