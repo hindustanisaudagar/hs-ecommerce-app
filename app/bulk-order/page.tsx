@@ -16,8 +16,14 @@ export default function BulkOrderPage() {
   const fetchDeals = async () => {
     try {
       const res = await fetch('/api/admin/deals')
+      if (!res.ok) {
+        console.error('API error:', await res.text())
+        return
+      }
       const json = await res.json()
-      setSettings(json)
+      if (json && !json.error) {
+        setSettings(json)
+      }
     } catch (e) {
       console.error('Failed to load deals data', e)
     } finally {
