@@ -86,6 +86,7 @@ export default function AdminCategoriesPage() {
     description: '',
     parent_id: '',
     image: '',
+    is_active: true,
   })
   const [uploading, setUploading] = useState(false)
   const [previewImage, setPreviewImage] = useState<string>('')
@@ -97,7 +98,7 @@ export default function AdminCategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch('/api/categories?hierarchical=true')
+      const res = await fetch('/api/categories?hierarchical=true&onlyActive=false')
       const data = await res.json()
       setCategories(data || [])
     } catch (error) {
@@ -225,9 +226,95 @@ export default function AdminCategoriesPage() {
       description: category.description || '',
       parent_id: category.parent_id || '',
       image: category.image || '',
+      is_active: category.is_active ?? true,
     })
     setPreviewImage(category.image || '')
     setShowForm(true)
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure? This will also delete subcategories.')) return
+
+    try {
+      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' })
+      
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Failed to delete category')
+      }
+      
+      fetchCategories()
+    } catch (error: any) {
+      alert(error.message || 'Failed to delete category')
+      console.error('Failed to delete category:', error)
+    }
+  }
+
+  const renderCategories = (cats: Category[], level = 0) => {
+    return cats.map((category) => (
+      <React.Fragment key={category.id}>
+        <tr className={`hover:bg-warm-beige/30 transition-colors ${!category.is_active ? 'opacity-50' : ''}`}>
+          <td className="px-6 py-4">
+            <div className="flex items-center gap-3" style={{ paddingLeft: `${level * 24}px` }}>
+              {category.image ? (
+                <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-warm-beige flex-shrink-0">
+                  <Image
+                    src={category.image}
+                    alt={category.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-lg bg-warm-beige/50 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs text-muted-foreground">No img</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                {level > 0 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                <p className="font-medium text-ink">{category.name}</p>
+                {!category.is_active && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Disabled</span>}
+                {level === 0 && (
+                  <span className="text-xs text-muted-foreground bg-warm-beige/50 px-2 py-0.5 rounded">
+                    Main
+                  </span>
+                )}
+                {level === 1 && (
+                  <span className="text-xs text-muted-foreground bg-warm-beige/50 px-2 py-0.5 rounded">
+                    Sub
+                  </span>
+                )}
+                {level === 2 && (
+                  <span className="text-xs text-muted-foreground bg-warm-beige/50 px-2 py-0.5 rounded">
+                    Sub-Sub
+                  </span>
+                )}
+              </div>
+            </div>
+          </td>
+          <td className="px-6 py-4">
+            <p className="text-sm text-muted-foreground">{category.slug}</p>
+          </td>
+          <td className="px-6 py-4 text-right">
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => handleEdit(category)}
+                className="p-2 text-muted-foreground hover:text-terracotta transition-colors"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleDelete(category.id)}
+                className="p-2 text-muted-foreground hover:text-red-500 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </td>
+        </tr>
+        {category.children && renderCategories(category.children, level + 1)}
+      </React.Fragment>
+    ))
   }
 
   const handleDelete = async (id: string) => {
@@ -453,6 +540,16 @@ export default function AdminCategoriesPage() {
               className="w-full px-4 py-3 bg-warm-beige/50 border border-border/50 rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/50"
               placeholder="Brief description of this category"
             />
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={formData.is_active}
+              onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+              className="w-4 h-4 rounded border-border/50 text-terracotta focus:ring-terracotta"
+            />
+            <label className="text-sm text-ink">Active (visible on store)</label>
           </div>
 
           <div className="flex gap-4 pt-4 border-t border-border/50">

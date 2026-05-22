@@ -233,6 +233,15 @@ export function createSupabaseBackend(): BackendProvider {
         .select('*')
         .order('name')
       
+      // If we are not in admin, filter by is_active
+      if (params?.onlyActive !== false) {
+        query = query.eq('is_active', true)
+      }
+      
+      if (params?.limit) {
+        query = query.limit(params.limit)
+      }
+      
       if (params?.limit) {
         query = query.limit(params.limit)
       }

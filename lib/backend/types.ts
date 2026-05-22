@@ -25,6 +25,7 @@ export interface ProductResponse {
 export interface CategoryQuery {
   hierarchical?: boolean
   limit?: number
+  onlyActive?: boolean
 }
 
 export interface OrderInput {
