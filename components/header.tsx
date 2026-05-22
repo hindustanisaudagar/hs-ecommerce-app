@@ -438,7 +438,7 @@ export function Header() {
                     {category.children?.length > 0 && (
                       <div
                         className={cn(
-                          "absolute top-full left-1/2 -translate-x-1/2 pt-3 transition-all duration-200 ease-out z-50",
+                          "absolute top-full left-0 pt-3 transition-all duration-200 ease-out z-50",
                           activeDropdown === category.slug 
                             ? "opacity-100 visible translate-y-0" 
                             : "opacity-0 invisible -translate-y-2 pointer-events-none"
