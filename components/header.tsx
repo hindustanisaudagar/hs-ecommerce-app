@@ -33,7 +33,7 @@ interface StaticLink {
 }
 
 const staticLinks: StaticLink[] = [
-  { href: "#bulk-order", label: "Bulk Order & Deals" },
+  { href: "/bulk-order", label: "Bulk Order & Deals" },
 ]
 
 export function Header() {
