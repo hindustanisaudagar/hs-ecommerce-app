@@ -247,7 +247,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   {selectedVariation?.image_url && (
                     <button
                       onClick={() => setSelectedVariation(selectedVariation)}
-                      className={`relative aspect-square overflow-hidden rounded-xl bg-cream transition-all ring-2 ring-terracotta`}
+                      className={`relative aspect-square overflow-hidden rounded-lg bg-cream transition-all ring-2 ring-terracotta`}
                     >
                       <Image
                         src={selectedVariation.image_url}
@@ -262,7 +262,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     <button
                       key={index}
                       onClick={() => { setSelectedImage(index) }}
-                      className={`relative aspect-square overflow-hidden rounded-xl bg-cream transition-all ${
+                      className={`relative aspect-square overflow-hidden rounded-lg bg-cream transition-all ${
                         selectedImage === index ? 'ring-2 ring-terracotta' : 'ring-1 ring-border/30 hover:ring-terracotta/50'
                       }`}
                     >
@@ -282,7 +282,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
                   <button
                     onClick={() => setSelectedVariation(selectedVariation)}
-                    className={`relative aspect-square overflow-hidden rounded-xl bg-cream transition-all ring-2 ring-terracotta`}
+                    className={`relative aspect-square overflow-hidden rounded-lg bg-cream transition-all ring-2 ring-terracotta`}
                   >
                     <Image
                       src={selectedVariation.image_url}
