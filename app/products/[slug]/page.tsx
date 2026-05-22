@@ -328,46 +328,49 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     <div className="flex flex-wrap gap-3">
                       {/* Original Product */}
                       {originalProduct && (
-                        <button
-                          onClick={() => resetToOriginalProduct()}
-                          className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
-                            !selectedVariation
-                              ? 'ring-2 ring-terracotta border-terracotta'
-                              : 'border-border/50 hover:border-terracotta/50 opacity-60 hover:opacity-100'
-                          }`}
-                        >
-                          {originalProduct.images?.[0] ? (
-                            <Image src={originalProduct.images[0]} alt={originalProduct.name} fill className="object-cover" />
-                          ) : (
-                            <div className="w-full h-full bg-warm-beige flex items-center justify-center text-xs text-muted-foreground">No img</div>
-                          )}
-                        </button>
+                        <div className="flex flex-col items-center gap-1">
+                          <button
+                            onClick={() => resetToOriginalProduct()}
+                            className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                              !selectedVariation
+                                ? 'ring-2 ring-terracotta border-terracotta'
+                                : 'border-border/50 hover:border-terracotta/50 opacity-60 hover:opacity-100'
+                            }`}
+                          >
+                            {originalProduct.images?.[0] ? (
+                              <Image src={originalProduct.images[0]} alt={originalProduct.name} fill className="object-cover" />
+                            ) : (
+                              <div className="w-full h-full bg-warm-beige flex items-center justify-center text-xs text-muted-foreground">No img</div>
+                            )}
+                          </button>
+                        </div>
                       )}
 
                       {/* Variations */}
                       {originalVariations.map((variation) => (
-                        <button
-                          key={variation.id}
-                          onClick={() => { setSelectedVariation(variation); setSelectedImage(-1); if (variation.sku) fetchProductBySku(variation.sku) }}
-                          className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
-                            selectedVariation?.id === variation.id
-                              ? 'ring-2 ring-terracotta border-terracotta'
-                              : 'border-border/50 hover:border-terracotta/50 opacity-60 hover:opacity-100'
-                          }`}
-                        >
-                          {variation.image_url ? (
-                            <Image src={variation.image_url} alt={variation.color_name || ''} fill className="object-cover" />
-                          ) : variation.color_hex ? (
-                            <div className="w-full h-full" style={{ backgroundColor: variation.color_hex }} />
-                          ) : (
-                            <div className="w-full h-full bg-warm-beige flex items-center justify-center text-xs text-muted-foreground">No img</div>
-                          )}
+                        <div key={variation.id} className="flex flex-col items-center gap-1">
+                          <button
+                            onClick={() => { setSelectedVariation(variation); setSelectedImage(-1); if (variation.sku) fetchProductBySku(variation.sku) }}
+                            className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                              selectedVariation?.id === variation.id
+                                ? 'ring-2 ring-terracotta border-terracotta'
+                                : 'border-border/50 hover:border-terracotta/50 opacity-60 hover:opacity-100'
+                            }`}
+                          >
+                            {variation.image_url ? (
+                              <Image src={variation.image_url} alt={variation.color_name || ''} fill className="object-cover" />
+                            ) : variation.color_hex ? (
+                              <div className="w-full h-full" style={{ backgroundColor: variation.color_hex }} />
+                            ) : (
+                              <div className="w-full h-full bg-warm-beige flex items-center justify-center text-xs text-muted-foreground">No img</div>
+                            )}
+                          </button>
                           {variation.color_name && (
-                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] bg-ink/70 text-cream px-1.5 py-0.5 rounded whitespace-nowrap">
+                            <span className="text-[10px] text-ink/70 whitespace-nowrap">
                               {variation.color_name}
                             </span>
                           )}
-                        </button>
+                        </div>
                       ))}
                     </div>
                   </div>
