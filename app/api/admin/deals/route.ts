@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from('wholesale_settings')
       .select('*')
@@ -29,7 +29,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const body = await req.json()
 
     const payload: any = {}
