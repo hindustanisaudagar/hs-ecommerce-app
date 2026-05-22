@@ -214,18 +214,18 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     className="object-cover"
                     loading="lazy"
                   />
-                ) : selectedVariation?.image_url ? (
-                  <Image
-                    src={selectedVariation.image_url}
-                    alt={`${product.name} - ${selectedVariation.color_name}`}
-                    fill
-                    className="object-cover"
-                    loading="lazy"
-                  />
                 ) : product.images?.[0] ? (
                   <Image
                     src={product.images[0]}
                     alt={product.name}
+                    fill
+                    className="object-cover"
+                    loading="lazy"
+                  />
+                ) : selectedVariation?.image_url ? (
+                  <Image
+                    src={selectedVariation.image_url}
+                    alt={`${product.name} - ${selectedVariation.color_name}`}
                     fill
                     className="object-cover"
                     loading="lazy"
