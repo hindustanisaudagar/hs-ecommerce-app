@@ -128,6 +128,7 @@ export function Hero() {
             className="object-cover transition-opacity duration-500"
             priority
             sizes="100vw"
+            quality={100}
           />
         )}
       </div>

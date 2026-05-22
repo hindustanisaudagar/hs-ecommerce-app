@@ -1,12 +1,56 @@
-import React from 'react'
-import { Mail, Phone, Download, Building2, Upload } from 'lucide-react'
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
+import { Mail, Phone, Loader2 } from 'lucide-react'
 
 export default function BulkOrderPage() {
+  const [settings, setSettings] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchDeals()
+  }, [])
+
+  const fetchDeals = async () => {
+    try {
+      const res = await fetch('/api/admin/deals')
+      const json = await res.json()
+      setSettings(json)
+    } catch (e) {
+      console.error('Failed to load deals data', e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <main className="min-h-screen">
+        <Header />
+        <div className="flex items-center justify-center h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-terracotta" />
+        </div>
+        <Footer />
+      </main>
+    )
+  }
+
   return (
-    <main className="min-h-screen bg-cream py-12">
-      <div className="max-w-4xl mx-auto px-4 md:px-8">
+    <main className="min-h-screen bg-cream">
+      <Header />
+
+      {settings?.banner_url && (
+        <div className="relative w-full h-[400px] overflow-hidden">
+          <img src={settings.banner_url} alt="Wholesale Banner" className="w-full h-full object-cover" />
+        </div>
+      )}
+
+      <div className="max-w-4xl mx-auto px-4 md:px-8 py-12">
+
         <h1 className="font-serif text-4xl md:text-5xl text-ink mb-6 text-center">
-          Hindustani Saudagar – Bulk & Wholesale Program
+          {settings?.title || 'Hindustani Saudagar – Bulk & Wholesale Program'}
         </h1>
         <p className="text-lg text-ink/70 text-center mb-6">
           India's Home of Handmade Ceramics & Artisan Craft
@@ -17,12 +61,6 @@ export default function BulkOrderPage() {
         <p className="text-ink/80 text-center max-w-2xl mx-auto mb-10">
           If you run a store, gifting company, boutique, café, or want to start your own business, HS brings authentic handmade ceramics & artisan lifestyle products straight from the source.
         </p>
-
-        {/* Banner Placeholder */}
-        <div className="border-2 border-dashed border-border p-8 rounded-2xl mb-12 text-center">
-          <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-          <p className="text-muted-foreground">Upload Wholesale Banner</p>
-        </div>
 
         {/* Why Partner */}
         <section className="bg-white p-8 rounded-2xl shadow-premium mb-8">
@@ -153,7 +191,9 @@ export default function BulkOrderPage() {
             </button>
           </form>
         </section>
+
       </div>
+      <Footer />
     </main>
   )
 }
