@@ -205,7 +205,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             {/* Image Gallery */}
             <div className="space-y-4">
               <div className="relative aspect-square overflow-hidden rounded-3xl bg-cream">
-                {selectedVariation?.image_url ? (
+                {(selectedImage >= 0 && product.images?.[selectedImage])
+                  ? (
+                  <Image
+                    src={product.images[selectedImage]}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                    loading="lazy"
+                  />
+                ) : selectedVariation?.image_url ? (
                   <Image
                     src={selectedVariation.image_url}
                     alt={`${product.name} - ${selectedVariation.color_name}`}
@@ -213,9 +222,9 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     className="object-cover"
                     loading="lazy"
                   />
-                ) : product.images?.[selectedImage] ? (
+                ) : product.images?.[0] ? (
                   <Image
-                    src={product.images[selectedImage]}
+                    src={product.images[0]}
                     alt={product.name}
                     fill
                     className="object-cover"
