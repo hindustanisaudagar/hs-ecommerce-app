@@ -446,11 +446,12 @@ export function Header() {
                         onMouseEnter={() => handleMouseEnter(category.slug)}
                         onMouseLeave={handleMouseLeave}
                       >
-                        <div className="bg-background border border-border/50 shadow-premium-lg rounded-xl p-6 min-w-[600px] max-w-[900px]">
+                        <div className="bg-background border border-border/50 shadow-premium-lg rounded-xl p-6 min-w-[600px] max-w-[1100px]">
                           <div className={cn(
                             "grid",
-                            category.children.length >= 3 ? "grid-cols-3 gap-8" :
-                            category.children.length === 2 ? "grid-cols-2 gap-8" : "grid-cols-1 gap-4"
+                            category.children.length >= 4 ? "grid-cols-4 gap-6" :
+                            category.children.length === 3 ? "grid-cols-3 gap-6" :
+                            category.children.length === 2 ? "grid-cols-2 gap-6" : "grid-cols-1 gap-4"
                           )}>
                             {category.children.map((child) => (
                               <div key={child.id} className="min-w-0">
