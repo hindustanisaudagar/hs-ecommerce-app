@@ -54,8 +54,13 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         if (parentProduct?.has_variations && parentProduct.id) {
           const varRes = await fetch(`/api/products/${parentProduct.id}/variations`)
           const varData = await varRes.json()
-          setOriginalVariations(varData.variations || [])
-          setVariations(varData.variations || [])
+          const fetchedVariations = varData.variations || []
+          setOriginalVariations(fetchedVariations)
+          setVariations(fetchedVariations)
+
+          // Auto-select the variation matching current product's SKU
+          const matchingVar = fetchedVariations.find((v: ProductVariation) => v.sku === foundProduct.sku)
+          if (matchingVar) setSelectedVariation(matchingVar)
         } else {
           setOriginalVariations([])
           setVariations([])
