@@ -29,6 +29,7 @@ export function Bestsellers() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const autoScrollRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     fetchData()
@@ -45,6 +46,20 @@ export function Bestsellers() {
         window.removeEventListener('resize', checkScrollButtons)
       }
     }
+  }, [products])
+
+  useEffect(() => {
+    if (products.length === 0) return
+    const interval = setInterval(() => {
+      const container = scrollRef.current
+      if (!container) return
+      if (container.scrollLeft >= container.scrollWidth - container.clientWidth - 10) {
+        container.scrollTo({ left: 0, behavior: 'smooth' })
+      } else {
+        scroll('right')
+      }
+    }, 4000)
+    return () => clearInterval(interval)
   }, [products])
 
   const checkScrollButtons = () => {
@@ -133,24 +148,24 @@ export function Bestsellers() {
         {/* Carousel Container */}
         <div className="relative">
           {/* Scroll Buttons */}
-          {canScrollLeft && (
-            <button
-              onClick={() => scroll('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 rounded-full bg-cream shadow-lg flex items-center justify-center hover:bg-warm-beige transition-all duration-300"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft className="w-6 h-6 text-ink" />
-            </button>
-          )}
-          {canScrollRight && (
-            <button
-              onClick={() => scroll('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 rounded-full bg-cream shadow-lg flex items-center justify-center hover:bg-warm-beige transition-all duration-300"
-              aria-label="Scroll right"
-            >
-              <ChevronRight className="w-6 h-6 text-ink" />
-            </button>
-          )}
+          <button
+            onClick={() => scroll('left')}
+            className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 rounded-full bg-cream shadow-lg flex items-center justify-center hover:bg-warm-beige transition-all duration-300 ${
+              canScrollLeft ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            }`}
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-6 h-6 text-ink" />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 rounded-full bg-cream shadow-lg flex items-center justify-center hover:bg-warm-beige transition-all duration-300 ${
+              canScrollRight ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            }`}
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-6 h-6 text-ink" />
+          </button>
 
           {/* Scrollable Products */}
           <div

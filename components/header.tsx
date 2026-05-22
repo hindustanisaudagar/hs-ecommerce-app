@@ -144,33 +144,33 @@ export function Header() {
       {/* Main Header - Compact Single Row */}
       <div className={cn(
         "transition-all duration-500 ease-out bg-background border-b border-border/20",
-        isScrolled && "shadow-premium bg-background/95 backdrop-blur-xl"
+        isScrolled && "shadow-premium bg-background/95"
       )}>
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12">
           <div className="flex items-center justify-between h-14 md:h-16">
             {/* Logo + Brand Name */}
             <Link href="/" className="flex items-center gap-3 group shrink-0 min-w-0">
-              <div className="relative w-10 h-10 md:w-12 md:h-12 flex-shrink-0">
+              <div className="relative w-14 h-14 md:w-16 md:h-16 flex-shrink-0 rounded-md overflow-hidden">
                 <Image
                   src="/images/logo.jpg"
                   alt="Hindustani Saudagar"
                   fill
-                  className="object-contain"
+                  className="object-contain mix-blend-multiply"
                   priority
                 />
               </div>
-              <span className="font-serif text-sm md:text-base font-semibold tracking-tight text-ink whitespace-nowrap">
+              <span className="font-serif text-lg md:text-xl font-semibold tracking-tight text-ink whitespace-nowrap">
                 Hindustani Saudagar
               </span>
             </Link>
 
             {/* Hindi Strip - Compact Tri-Color */}
-            <div className="hidden md:flex items-center gap-2 shrink-0">
-              <span className="font-hindi text-base text-orange-600 font-medium tracking-wide">
+            <div className="hidden md:flex items-center gap-3 shrink-0">
+              <span className="font-hindi text-3xl text-orange-600 font-medium tracking-wide">
                 बिताइए कुछ पल
               </span>
-              <span className="text-ink/40 text-base">·</span>
-              <span className="font-hindi text-base text-green-700 font-medium tracking-wide">
+              <span className="text-ink/40 text-3xl">·</span>
+              <span className="font-hindi text-3xl text-green-700 font-medium tracking-wide">
                 देश की मिट्टी के नाम
               </span>
             </div>
@@ -294,7 +294,7 @@ export function Header() {
                             src="/images/logo.jpg"
                             alt="Hindustani Saudagar"
                             fill
-                            className="object-contain"
+                  className="object-contain mix-blend-multiply"
                           />
                         </div>
                         <span className="font-serif text-base">Hindustani Saudagar</span>

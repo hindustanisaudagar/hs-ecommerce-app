@@ -107,7 +107,7 @@ export function Categories() {
           {categories.map((category, index) => (
             <Reveal key={category.id} delay={index * 80}>
               <Link href={category.slug.startsWith('/') ? category.slug : `/products?category=${category.slug}`} className="group block">
-                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl md:rounded-3xl shadow-premium transition-all duration-500 group-hover:shadow-premium-lg">
+                <div className="relative aspect-[4/4] overflow-hidden rounded-lg md:rounded-xl shadow-premium transition-all duration-500 group-hover:shadow-premium-lg">
                   {category.image ? (
                     <Image
                       src={category.image}
@@ -121,7 +121,7 @@ export function Categories() {
                     </div>
                   )}
                   
-                  <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6">
+                  <div className="absolute inset-0 flex flex-col justify-end px-5 pb-1 pt-5 md:px-6 md:pb-2 md:pt-6">
                     {category.description && (
                       <p className="text-[10px] uppercase tracking-[0.2em] text-cream/70 mb-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
                         {category.description}
