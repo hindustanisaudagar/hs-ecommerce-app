@@ -23,17 +23,23 @@ export async function GET(request: Request) {
     
     // If category param is provided, resolve it and include all child categories
     if (category) {
+      console.log(`🔍 DEBUG: Fetching for category slug: "${category}"`);
       const supabase = await createClient()
       
       // First try to find by slug
-      const { data: categoryBySlug } = await supabase
+      const { data: categoryBySlug, error: slugError } = await supabase
         .from('categories')
-        .select('id, slug')
+        .select('id, slug, name')
         .eq('slug', category)
         .single()
       
+      if (slugError) {
+        console.error(`❌ DEBUG: Error finding category slug "${category}":`, slugError);
+      }
+      
       if (categoryBySlug) {
         const categoryId = categoryBySlug.id
+        console.log(`✅ DEBUG: Found category: ${categoryBySlug.name} (ID: ${categoryId})`);
         
         // Get all child category IDs recursively
         const { data: allCategories } = await supabase
@@ -43,10 +49,20 @@ export async function GET(request: Request) {
         const childIds = allCategories ? getChildCategoryIds(categoryId, allCategories) : []
         const allCategoryIds = [categoryId, ...childIds]
         
-        console.log(`📂 Category "${category}" resolved to ID: ${categoryId}, with ${childIds.length} children`)
+        console.log(`📂 Category "${category}" resolved to ID: ${categoryId}, with ${childIds.length} children. Total IDs: ${allCategoryIds.join(', ')}`);
         
         // Always use categoryIds for consistent filtering
         const backend = await createBackend()
+        
+        // DEBUG: Check how many products exist for this category_id in DB directly
+        const { count: productCount, error: countError } = await supabase
+          .from('products')
+          .select('id', { count: 'exact', head: true })
+          .in('category_id', allCategoryIds)
+          .eq('is_active', true);
+
+        console.log(`🔍 DEBUG: Products found in DB for these IDs (active=true): ${productCount}`);
+
         const result = await backend.getProducts({
           categoryIds: allCategoryIds,
           search: search || undefined,
@@ -59,10 +75,10 @@ export async function GET(request: Request) {
           page,
           limit,
         })
-        console.log(`📦 GET /api/products - Returning ${result.products.length} products for category "${category}"`)
+        console.log(`📦 DEBUG: Returning ${result.products.length} products for category slug "${category}"`);
         return NextResponse.json(result)
       } else {
-        console.warn(`⚠️ Category slug "${category}" not found in database`)
+        console.warn(`⚠️ DEBUG: Category slug "${category}" not found in database. Check if slug matches exactly!`);
       }
     }
     

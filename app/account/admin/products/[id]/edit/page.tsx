@@ -182,7 +182,7 @@ export default function AdminEditProductPage({ params }: { params: Promise<{ id:
     try {
       const res = await fetch('/api/categories')
       const data = await res.json()
-      setCategories(data.categories || [])
+      setCategories(Array.isArray(data) ? data : (data.categories || []))
     } catch (error) {
       console.error('Failed to fetch categories:', error)
     }

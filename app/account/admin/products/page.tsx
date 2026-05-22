@@ -9,16 +9,22 @@ import { Product } from '@/types'
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalProducts, setTotalProducts] = useState(0)
 
   useEffect(() => {
-    fetchProducts()
-  }, [])
+    fetchProducts(currentPage)
+  }, [currentPage])
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (page: number) => {
+    setLoading(true)
     try {
-      const res = await fetch('/api/products?limit=100')
+      const res = await fetch(`/api/products?page=${page}&limit=20`)
       const data = await res.json()
       setProducts(data.products || [])
+      setTotalPages(data.totalPages || 1)
+      setTotalProducts(data.total || 0)
     } catch (error) {
       console.error('Failed to fetch products:', error)
     } finally {
@@ -31,7 +37,7 @@ export default function AdminProductsPage() {
 
     try {
       await fetch(`/api/products/${id}`, { method: 'DELETE' })
-      fetchProducts()
+      fetchProducts(currentPage)
     } catch (error) {
       console.error('Failed to delete product:', error)
     }
@@ -40,7 +46,7 @@ export default function AdminProductsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="font-serif text-2xl text-ink">Products</h1>
+        <h1 className="font-serif text-2xl text-ink">Products ({totalProducts} total)</h1>
         <Link
             href="/account/admin/products/new"
           className="flex items-center gap-2 bg-ink text-cream px-6 py-3 rounded-xl text-sm hover:bg-ink/90 transition-colors"
@@ -65,131 +71,82 @@ export default function AdminProductsPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-cream rounded-2xl overflow-hidden shadow-premium">
-          <table className="w-full">
-            <thead className="bg-warm-beige/50">
-              <tr>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
-                  Product
-                </th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
-                  SKU
-                </th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
-                  Variations
-                </th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
-                  Price
-                </th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
-                  Stock
-                </th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
-                  Status
-                </th>
-                <th className="text-right px-6 py-4 text-sm font-medium text-muted-foreground">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {products.map((product) => (
-                <tr key={product.id} className="hover:bg-warm-beige/30 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-warm-beige shrink-0">
-                        {product.images?.[0] ? (
-                          <Image
-                            src={product.images[0]}
-                            alt={product.name}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                            No Image
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium text-ink">{product.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {product.category?.name || 'No category'}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-sm text-ink font-mono">{product.sku || '-'}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-ink">
-                      {product.has_variations ? 'Yes' : 'No'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-ink">
-                      ₹{product.price.toLocaleString('en-IN')}
-                    </p>
-                    {product.original_price && product.original_price > product.price && (
-                      <p className="text-sm text-muted-foreground line-through">
-                        ₹{product.original_price.toLocaleString('en-IN')}
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs ${
-                        product.stock > 10
-                          ? 'bg-green-100 text-green-700'
-                          : product.stock > 0
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : 'bg-red-100 text-red-700'
-                      }`}
-                    >
-                      {product.stock} in stock
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs ${
-                        product.is_active
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {product.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`/products/${product.slug}`}
-                        className="p-2 text-muted-foreground hover:text-ink transition-colors"
-                        title="View"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Link>
-                      <Link
-                        href={`/account/admin/products/${product.id}/edit`}
-                        className="p-2 text-muted-foreground hover:text-terracotta transition-colors"
-                        title="Edit"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="p-2 text-muted-foreground hover:text-red-500 transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+        <div className="space-y-4">
+          <div className="bg-cream rounded-2xl overflow-hidden shadow-premium">
+            <table className="w-full">
+              <thead className="bg-warm-beige/50">
+                <tr>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Product</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">SKU</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Price</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Stock</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Status</th>
+                  <th className="text-right px-6 py-4 text-sm font-medium text-muted-foreground">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border/50">
+                {products.map((product) => (
+                  <tr key={product.id} className="hover:bg-warm-beige/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-warm-beige shrink-0">
+                          {product.images?.[0] ? (
+                            <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No Image</div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-ink">{product.name}</p>
+                          <p className="text-sm text-muted-foreground">{product.category?.name || 'No category'}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-ink font-mono">{product.sku || '-'}</td>
+                    <td className="px-6 py-4">
+                      <p className="text-ink">₹{product.price.toLocaleString('en-IN')}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs ${product.stock > 10 ? 'bg-green-100 text-green-700' : product.stock > 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+                        {product.stock} in stock
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs ${product.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                        {product.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link href={`/products/${product.slug}`} className="p-2 text-muted-foreground hover:text-ink transition-colors"><Eye className="w-4 h-4" /></Link>
+                        <Link href={`/account/admin/products/${product.id}/edit`} className="p-2 text-muted-foreground hover:text-terracotta transition-colors"><Edit className="w-4 h-4" /></Link>
+                        <button onClick={() => handleDelete(product.id)} className="p-2 text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Pagination */}
+          <div className="flex justify-between items-center bg-cream p-4 rounded-xl shadow-premium">
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-warm-beige rounded-lg text-sm disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-muted-foreground">Page {currentPage} of {totalPages}</span>
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-warm-beige rounded-lg text-sm disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </div>
