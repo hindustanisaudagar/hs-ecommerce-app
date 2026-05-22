@@ -1,8 +1,23 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
+import { ChevronRight, Edit, Trash2, Plus, Loader2, Upload, X } from 'lucide-react'
 
 interface Category {
+  id: string
+  name: string
+  slug: string
+  description?: string
+  parent_id?: string | null
+  image?: string | null
+  is_active: boolean
+  level: number
+  label: string
+  children?: Category[]
+}
+
+interface FlatCategory {
   id: string
   name: string
   level: number
