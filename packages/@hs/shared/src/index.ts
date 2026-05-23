@@ -1,4 +1,5 @@
 export * from './types'
-export * from './stores'
+export { useCart, useWishlist, useCompare } from './stores'
+export type { WishlistItem, CompareItem } from './stores'
 export * from './lib'
 export * from './theme'
