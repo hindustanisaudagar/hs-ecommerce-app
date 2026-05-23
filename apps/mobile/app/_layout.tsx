@@ -9,10 +9,15 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <View style={{ flex: 1, backgroundColor: 'red' }}>
-        <Text style={{ color: 'white', marginTop: 50 }}>Debug: all imports OK, no tabs</Text>
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="product/[slug]" options={{ headerShown: true, title: 'Product', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
+          <Stack.Screen name="auth/login" options={{ headerShown: true, title: 'Sign In', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
+          <Stack.Screen name="auth/signup" options={{ headerShown: true, title: 'Sign Up', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
+          <Stack.Screen name="checkout/index" options={{ headerShown: true, title: 'Checkout', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
+          <Stack.Screen name="account/index" options={{ headerShown: true, title: 'My Account', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
+          <Stack.Screen name="account/orders" options={{ headerShown: true, title: 'Orders', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
         </Stack>
       </View>
     </SafeAreaProvider>

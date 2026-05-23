@@ -7,7 +7,7 @@
     "icon": "./assets/icon.png",
     "scheme": "hindustani-saudagar",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "backgroundColor": "#FAF8F5"
     },
