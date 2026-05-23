@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar'
 import { View, ActivityIndicator, Text } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { colors } from '@hs/shared'
+import "../global.css"
 
 export default function RootLayout() {
   return (
