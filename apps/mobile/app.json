@@ -22,7 +22,17 @@
       "package": "com.hindustanisaudagar.app"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "gradleProperties": {
+              "org.gradle.jvmargs": "-Xmx6144m -XX:MaxMetaspaceSize=1024m"
+            }
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
