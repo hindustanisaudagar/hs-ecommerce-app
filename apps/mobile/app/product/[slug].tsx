@@ -1,9 +1,9 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Share, Alert, TextInput } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { colors, formatPrice, apiFetch, type Product, type ProductVariation } from '@hs/shared'
 import { useCart, useWishlist } from '@hs/shared'
 import { useEffect, useState } from 'react'
-import { Heart, ShoppingBag, ChevronLeft, Star, Shield, Truck, RotateCcw } from 'lucide-react-native'
+import { Heart, ShoppingBag, ChevronLeft, Star, Shield, Truck, RotateCcw, Share2 } from 'lucide-react-native'
 
 export default function ProductDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
@@ -12,6 +12,16 @@ export default function ProductDetailScreen() {
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedVariation, setSelectedVariation] = useState<string | null>(null)
+  
+  // Pincode Estimator States
+  const [pincode, setPincode] = useState('')
+  const [deliveryInfo, setDeliveryInfo] = useState<{
+    days: number
+    shipping: string
+    cod: boolean
+  } | null>(null)
+  const [checkingPincode, setCheckingPincode] = useState(false)
+
   const { addItem } = useCart()
   const { toggleItem, isInWishlist } = useWishlist()
 
@@ -28,6 +38,37 @@ export default function ProductDetailScreen() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleShare = async () => {
+    if (!product) return
+    try {
+      await Share.share({
+        title: product.name,
+        message: `Check out this beautiful ${product.name} on Hindustani Saudagar! 🏺 ${formatPrice(product.price)}\n\nDiscover handcrafted swadeshi ceramics directly from artisans.\nLink: https://hindustanisaudagar.in/product/${product.slug}`,
+      })
+    } catch (e: any) {
+      Alert.alert('Error sharing product', e.message)
+    }
+  }
+
+  const handleCheckPincode = () => {
+    if (!/^\d{6}$/.test(pincode)) {
+      Alert.alert('Invalid Pincode', 'Please enter a valid 6-digit pincode.')
+      return
+    }
+    setCheckingPincode(true)
+    setTimeout(() => {
+      // Generate some mock realistic delivery info based on pincode digits
+      const firstDigit = parseInt(pincode[0])
+      const days = (firstDigit % 3) + 2 // 2 to 4 days
+      setDeliveryInfo({
+        days,
+        shipping: product && product.price >= 500 ? 'Free Delivery' : 'Standard Shipping',
+        cod: true
+      })
+      setCheckingPincode(false)
+    }, 800)
   }
 
   if (loading) {
@@ -61,6 +102,9 @@ export default function ProductDetailScreen() {
           />
           <TouchableOpacity className="absolute top-12 left-4 bg-white/90 rounded-full p-2" onPress={() => router.back()}>
             <ChevronLeft size={24} color={colors.ink} />
+          </TouchableOpacity>
+          <TouchableOpacity className="absolute top-12 right-4 bg-white/90 rounded-full p-2" onPress={handleShare}>
+            <Share2 size={22} color={colors.ink} />
           </TouchableOpacity>
           {images.length > 1 && (
             <View className="flex-row justify-center -mt-4 gap-2">
@@ -116,6 +160,49 @@ export default function ProductDetailScreen() {
               </View>
             </View>
           )}
+
+          {/* Pincode Delivery Estimator */}
+          <View className="mt-6 bg-white border border-border rounded-xl p-4">
+            <Text className="text-xs font-bold text-ink uppercase tracking-wider mb-2">Check Delivery Timeline</Text>
+            <View className="flex-row gap-2">
+              <TextInput
+                className="flex-1 bg-background border border-border rounded-xl px-4 py-2 text-ink text-sm"
+                placeholder="Enter 6-digit Pincode"
+                placeholderTextColor={colors.clayBrown}
+                keyboardType="numeric"
+                maxLength={6}
+                value={pincode}
+                onChangeText={setPincode}
+              />
+              <TouchableOpacity
+                className="bg-accent px-6 py-2.5 rounded-xl justify-center items-center"
+                onPress={handleCheckPincode}
+                disabled={checkingPincode}
+              >
+                {checkingPincode ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text className="text-white font-bold text-sm">Check</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {deliveryInfo && (
+              <View className="mt-3 pt-3 border-t border-border/50 gap-1.5">
+                <Text className="text-xs text-ink font-medium">
+                  🚚 Delivery in <Text className="text-accent font-bold">{deliveryInfo.days} Days</Text> (Estimated by {[
+                    'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
+                  ][(new Date(Date.now() + deliveryInfo.days * 24 * 60 * 60 * 1000)).getDay()]})
+                </Text>
+                <Text className="text-xs text-ink font-medium">
+                  ✨ {deliveryInfo.shipping} on this order
+                </Text>
+                <Text className="text-xs text-ink font-medium">
+                  ✅ Cash on Delivery (COD) available
+                </Text>
+              </View>
+            )}
+          </View>
 
           {/* Features */}
           {product.features && product.features.length > 0 && (
