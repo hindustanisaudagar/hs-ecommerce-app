@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, Image, TouchableOpacity, TextInput, ActivityIndicator, Modal } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter, useLocalSearchParams } from 'expo-router'
-import { colors, formatPrice, apiFetch, type Product } from '@hs/shared'
+import { colors, formatPrice, supabase, type Product } from '@hs/shared'
 import { useCart, useWishlist } from '@hs/shared'
 import { useEffect, useState } from 'react'
 import { Heart, ShoppingBag, Filter, Search, X, Check } from 'lucide-react-native'
@@ -69,8 +69,15 @@ export default function ShopScreen() {
   const loadProducts = async () => {
     setLoading(true)
     try {
-      const data = await apiFetch<{ products: Product[] }>(`/products${search ? `?search=${search}` : ''}`)
-      setProducts(data.products || [])
+      let query = supabase
+        .from('products')
+        .select('*, category:categories(name, slug)')
+        .eq('is_active', true)
+      if (search) {
+        query = query.ilike('name', `%${search}%`)
+      }
+      const { data, error } = await query.order('created_at', { ascending: false })
+      if (data) setProducts(data as Product[])
     } catch {
       setProducts([])
     } finally {

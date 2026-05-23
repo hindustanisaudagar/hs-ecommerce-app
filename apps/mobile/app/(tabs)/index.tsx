@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, Image, TouchableOpacity, FlatList } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { colors, formatPrice, apiFetch, type Product, type Category } from '@hs/shared'
+import { colors, formatPrice, supabase, type Product, type Category } from '@hs/shared'
 import { useEffect, useState } from 'react'
 import { useCart, useWishlist } from '@hs/shared'
 import { Heart, ShoppingBag, Star, ChevronRight } from 'lucide-react-native'
@@ -28,8 +28,13 @@ export default function HomeScreen() {
 
   const loadProducts = async () => {
     try {
-      const data = await apiFetch<{ products: Product[] }>('/products?limit=10')
-      setProducts(data.products || [])
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, category:categories(name, slug)')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(10)
+      if (data) setProducts(data as Product[])
     } catch {
       // Fallback
     } finally {

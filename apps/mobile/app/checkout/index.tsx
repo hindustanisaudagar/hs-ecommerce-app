@@ -1,7 +1,7 @@
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Modal } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { colors, formatPrice, useCart } from '@hs/shared'
+import { colors, formatPrice, supabase, useCart } from '@hs/shared'
 import { useState } from 'react'
 import { CreditCard, Smartphone, Globe, ShieldCheck, X, CheckCircle } from 'lucide-react-native'
 
@@ -26,8 +26,6 @@ export default function CheckoutScreen() {
   const total = getTotalPrice()
   const shipping = total >= 500 ? 0 : 49
   const grandTotal = total + shipping
-
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000'
 
   const handlePlaceOrderClick = () => {
     if (!name || !phone || !address || !city || !state || !pincode) {
@@ -76,21 +74,19 @@ export default function CheckoutScreen() {
 
   const submitOrderToDatabase = async (transactionId: string) => {
     try {
-      const res = await fetch(`${apiUrl}/api/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: items.map(i => ({ product_id: i.product.id, quantity: i.quantity, price: i.product.price })),
-          shipping_address: { name, phone, address, city, state, pincode },
-          total_amount: grandTotal,
-          payment_method: 'Razorpay Online',
-          razorpay_payment_id: transactionId,
-          razorpay_order_id: `order_${Math.random().toString(36).substring(2, 10).toUpperCase()}`
-        }),
+      const { data: { user } } = await supabase.auth.getUser()
+      const { error } = await supabase.from('orders').insert({
+        user_id: user?.id,
+        items: items.map(i => ({ product_id: i.product.id, quantity: i.quantity, price: i.product.price })),
+        shipping_address: { name, phone, address, city, state, pincode },
+        total_amount: grandTotal,
+        payment_method: 'Razorpay Online',
+        razorpay_payment_id: transactionId,
+        razorpay_order_id: `order_${Math.random().toString(36).substring(2, 10).toUpperCase()}`
       })
-      if (!res.ok) throw new Error('Database order logging failed')
+      if (error) throw error
     } catch (e: any) {
-      console.log('Backend log failed but payment succeeded: ', e.message)
+      console.log('Order insert failed: ', e.message)
     }
   }
 

@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { colors, formatPrice, formatDate, apiFetch, type Order } from '@hs/shared'
+import { colors, formatPrice, formatDate, supabase, type Order } from '@hs/shared'
 import { useEffect, useState } from 'react'
 import { Package, ChevronRight } from 'lucide-react-native'
 
@@ -14,8 +14,14 @@ export default function OrdersScreen() {
 
   const loadOrders = async () => {
     try {
-      const data = await apiFetch<Order[]>('/orders')
-      setOrders(Array.isArray(data) ? data : [])
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('orders')
+        .select('*, items:order_items(product:products(name, images))')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      if (data) setOrders(data as Order[])
     } catch {
       setOrders([])
     } finally {

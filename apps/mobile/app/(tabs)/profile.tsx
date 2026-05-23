@@ -1,15 +1,9 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { colors } from '@hs/shared'
+import { colors, supabase, useWishlist, useCart } from '@hs/shared'
 import { User, Package, MapPin, Settings, LogOut, ChevronRight, Heart, ShoppingBag } from 'lucide-react-native'
 import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
-import { useWishlist, useCart } from '@hs/shared'
-
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://yetqthumnxkxlujudrbd.supabase.co'
-const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlldHF0aHVtbnhreGx1anVkcmJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNzYzMDcsImV4cCI6MjA5NDc1MjMwN30.I3WlUeJTgmXE3gGeW_Iqwce2up4y_8f7GBlPJ5sEooM'
-const supabase = createClient(supabaseUrl, supabaseKey)
 
 const menuItems = [
   { icon: Package, label: 'My Orders', href: '/account/orders' },

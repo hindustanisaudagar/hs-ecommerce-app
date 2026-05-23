@@ -1,10 +1,10 @@
 import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { colors, formatPrice, useWishlist, useCart } from '@hs/shared'
+import { colors, formatPrice, supabase, useWishlist, useCart } from '@hs/shared'
 import { Heart, ShoppingBag, Trash2 } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
-import { apiFetch, type Product } from '@hs/shared'
+import { type Product } from '@hs/shared'
 
 export default function WishlistScreen() {
   const router = useRouter()
@@ -20,9 +20,12 @@ export default function WishlistScreen() {
 
   const loadWishlistedProducts = async () => {
     try {
-      const ids = items.map(i => i.productId).join(',')
-      const data = await apiFetch<{ products: Product[] }>(`/products?ids=${ids}`)
-      setProducts(data.products || [])
+      const ids = items.map(i => i.productId)
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .in('id', ids)
+      if (data) setProducts(data as Product[])
     } catch {
       setProducts([])
     }

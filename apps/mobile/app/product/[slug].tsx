@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Share, Alert, TextInput } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { colors, formatPrice, apiFetch, type Product, type ProductVariation } from '@hs/shared'
+import { colors, formatPrice, supabase, type Product, type ProductVariation } from '@hs/shared'
 import { useCart, useWishlist } from '@hs/shared'
 import { useEffect, useState } from 'react'
 import { Heart, ShoppingBag, ChevronLeft, Star, Shield, Truck, RotateCcw, Share2 } from 'lucide-react-native'
@@ -31,8 +31,12 @@ export default function ProductDetailScreen() {
 
   const loadProduct = async () => {
     try {
-      const data = await apiFetch<Product>(`/products/${slug}`)
-      setProduct(data)
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, category:categories(name, slug), variations:product_variations(*)')
+        .eq('slug', slug)
+        .single()
+      if (data) setProduct(data as Product)
     } catch {
       // Fallback
     } finally {

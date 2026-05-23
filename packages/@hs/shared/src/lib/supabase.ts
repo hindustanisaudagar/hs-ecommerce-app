@@ -1,12 +1,8 @@
-import { Platform } from './platform'
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = Platform.isWeb
-  ? (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_SUPABASE_URL : undefined)
-  : (process.env.EXPO_PUBLIC_SUPABASE_URL || '')
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://yetqthumnxkxlujudrbd.supabase.co'
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlldHF0aHVtbnhreGx1anVkcmJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNzYzMDcsImV4cCI6MjA5NDc1MjMwN30.I3WlUeJTgmXE3gGeW_Iqwce2up4y_8f7GBlPJ5sEooM'
 
-const supabaseAnonKey = Platform.isWeb
-  ? (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined)
-  : (process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '')
-
-export const SUPABASE_URL = supabaseUrl || ''
-export const SUPABASE_ANON_KEY = supabaseAnonKey || ''
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const SUPABASE_URL = supabaseUrl
+export const SUPABASE_ANON_KEY = supabaseAnonKey
