@@ -7,9 +7,14 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 const config = getDefaultConfig(projectRoot);
 
 config.watchFolders = [workspaceRoot];
+
 config.resolver.nodeModulesPaths = [
-  path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
+  path.resolve(projectRoot, 'node_modules'),
 ];
+
+config.resolver.extraNodeModules = {
+  'react-native-safe-area-context': path.resolve(workspaceRoot, 'node_modules', 'react-native-safe-area-context'),
+};
 
 module.exports = config;
