@@ -28,7 +28,7 @@
         {
           "android": {
             "gradleProperties": {
-              "org.gradle.jvmargs": "-Xmx6144m -XX:MaxMetaspaceSize=1024m"
+              "org.gradle.jvmargs": "-Xmx4096m"
             }
           }
         }
