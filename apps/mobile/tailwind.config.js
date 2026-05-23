@@ -25,9 +25,9 @@ module.exports = {
         gold: '#C9A962',
       },
       fontFamily: {
-        sans: ['Inter'],
-        serif: ['CormorantGaramond'],
-        hindi: ['TiroDevanagariHindi'],
+        sans: ['System'],
+        serif: ['System'],
+        hindi: ['System'],
       },
       borderRadius: {
         sm: '6px',

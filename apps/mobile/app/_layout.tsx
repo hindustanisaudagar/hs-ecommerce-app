@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { View, Text } from 'react-native'
+import { View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { colors } from '@hs/shared'
 import "../global.css"
@@ -9,8 +9,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <View style={{ flex: 1, backgroundColor: 'red' }}>
-        <Text style={{ color: 'white', marginTop: 50 }}>Debugging: Layout loaded</Text>
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="product/[slug]" options={{ headerShown: true, title: 'Product', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
