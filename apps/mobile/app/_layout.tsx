@@ -1,12 +1,26 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { View, Text } from 'react-native'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { colors } from '@hs/shared'
+import "../global.css"
 
 export default function RootLayout() {
   return (
-    <View style={{ flex: 1, backgroundColor: 'red', justifyContent: 'center', alignItems: 'center' }}>
-      <StatusBar style="light" />
-      <Text style={{ color: 'white', fontSize: 24 }}>Debug: Layout Rendered</Text>
-    </View>
+    <SafeAreaProvider>
+      <StatusBar style="dark" />
+      <View style={{ flex: 1, backgroundColor: 'red' }}>
+        <Text style={{ color: 'white', marginTop: 50 }}>Debug: global.css + shared + SafeArea OK</Text>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="product/[slug]" options={{ headerShown: true, title: 'Product', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
+          <Stack.Screen name="auth/login" options={{ headerShown: true, title: 'Sign In', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
+          <Stack.Screen name="auth/signup" options={{ headerShown: true, title: 'Sign Up', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
+          <Stack.Screen name="checkout/index" options={{ headerShown: true, title: 'Checkout', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
+          <Stack.Screen name="account/index" options={{ headerShown: true, title: 'My Account', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
+          <Stack.Screen name="account/orders" options={{ headerShown: true, title: 'Orders', headerTintColor: colors.ink, headerStyle: { backgroundColor: colors.cream } }} />
+        </Stack>
+      </View>
+    </SafeAreaProvider>
   )
 }
