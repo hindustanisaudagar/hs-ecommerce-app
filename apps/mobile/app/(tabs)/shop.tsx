@@ -6,15 +6,8 @@ import { useCart, useWishlist } from '@hs/shared'
 import { useEffect, useState } from 'react'
 import { Heart, ShoppingBag, Filter, Search, X, Check } from 'lucide-react-native'
 
-const filterCategories = [
-  { name: 'All Products', slug: 'all' },
-  { name: 'Ceramic Diffusers', slug: 'ceramic-diffusers' },
-  { name: 'Handmade Mugs', slug: 'handmade-mugs' },
-  { name: 'Planters', slug: 'planters' },
-  { name: 'Decorative Vases', slug: 'decorative-vases' },
-  { name: 'Terracotta', slug: 'terracotta' },
-  { name: 'Dinner Sets', slug: 'dinner-sets' },
-]
+// Categories are fetched dynamically from Supabase database inside the component
+
 
 const sortOptions = [
   { name: 'Featured / Default', value: 'default' },
@@ -51,8 +44,13 @@ export default function ShopScreen() {
   const { addItem } = useCart()
   const { toggleItem, isInWishlist } = useWishlist()
 
+  const [dbCategories, setDbCategories] = useState<{ name: string; slug: string }[]>([
+    { name: 'All Products', slug: 'all' }
+  ])
+
   // Initialize and load filters from URL search params
   useEffect(() => {
+    loadCategories()
     if (params.category) {
       setSelectedCategory(params.category)
       setTempCategory(params.category)
@@ -65,6 +63,23 @@ export default function ShopScreen() {
     }
     loadProducts()
   }, [params.category, params.search])
+
+  const loadCategories = async () => {
+    try {
+      const { data } = await supabase
+        .from('categories')
+        .select('name, slug')
+        .order('name', { ascending: true })
+      if (data) {
+        setDbCategories([
+          { name: 'All Products', slug: 'all' },
+          ...data.map((c: any) => ({ name: c.name, slug: c.slug }))
+        ])
+      }
+    } catch (e) {
+      console.log('Error loading categories:', e)
+    }
+  }
 
   const loadProducts = async () => {
     setLoading(true)
@@ -311,7 +326,7 @@ export default function ShopScreen() {
               <View className="mb-6">
                 <Text className="text-sm font-bold text-ink uppercase tracking-wider mb-3">Category</Text>
                 <View className="flex-row flex-wrap gap-2">
-                  {filterCategories.map((cat) => (
+                  {dbCategories.map((cat) => (
                     <TouchableOpacity
                       key={cat.slug}
                       className={`px-4 py-2.5 rounded-full border ${
